@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
@@ -14,10 +15,19 @@ namespace Sicoob.Visualizer.Monitor.Service
         /// </summary>
         static void Main()
         {
-            ServiceBase.Run(new ServiceBase[]
+            UpdateViwersService service = new UpdateViwersService(Settings.LoadSettings());
+
+            if (Debugger.IsAttached)
             {
-                new UpdateViwersService(Settings.LoadSettings())
-            });
+                service.Start();
+            }
+            else
+            {
+                ServiceBase.Run(new ServiceBase[]
+                {
+                    service
+                });
+            }
         }
     }
 }
