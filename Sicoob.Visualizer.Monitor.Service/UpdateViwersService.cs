@@ -1,15 +1,10 @@
 ﻿using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime;
 using System.ServiceProcess;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
@@ -63,6 +58,10 @@ namespace Sicoob.Visualizer.Monitor.Service
                     notifyNewRelatorio();
                     eventLog.WriteEntry("Started ok");
                 }
+                catch (Microsoft.Graph.ServiceException ex) 
+                { 
+                
+                }
                 catch (Exception ex)
                 {
                     eventLog.WriteEntry(ex.Message);
@@ -74,7 +73,7 @@ namespace Sicoob.Visualizer.Monitor.Service
 
         private void notifyNewRelatorio()
         {
-            var imageUri = Path.GetFullPath(@"Resources\relatorio.png");
+            var imageUri = Path.GetFullPath(@"Assets\Image\relatorio.png");
 
             new ToastContentBuilder()
                         .AddArgument("action", "viewConversation")

@@ -1,7 +1,5 @@
 using Sicoob.Visualizer.Monitor.Comuns.Database.Models;
-using System;
 using System.Data.Entity;
-using System.Linq;
 
 namespace Sicoob.Visualizer.Monitor.Comuns.Database
 {

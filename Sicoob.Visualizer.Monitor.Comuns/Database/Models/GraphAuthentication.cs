@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Sicoob.Visualizer.Monitor.Comuns.Database.Models
 {
     public class GraphAuthentication
     {
         [Key]
-        public int Id { get; set; } 
+        public int Id { get; set; }
         [StringLength(100)]
         public string TokenType { get; set; }
         [StringLength(2500)]

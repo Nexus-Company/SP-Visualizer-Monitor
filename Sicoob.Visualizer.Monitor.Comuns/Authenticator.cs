@@ -1,12 +1,8 @@
-﻿using Microsoft.Graph;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,13 +10,13 @@ using Process = System.Diagnostics.Process;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
-    internal class Authenticator
+    internal class Authenticator : IDisposable
     {
         private Settings _settings;
         private HttpListener _server;
         private AccessToken _access;
         private string baseOAuth
-            => $"https://login.microsoftonline.com/{HttpUtility.UrlEncode(_settings.TenantId)}/oauth2/v2.0/";
+            => $"https://login.microsoftonline.com/common/oauth2/v2.0/";
         public Authenticator(Settings settings)
         {
             _settings = settings;
@@ -96,6 +92,11 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             scopes = scopes.Remove(scopes.Length - 3, 3);
 
             return scopes;
+        }
+
+        public void Dispose()
+        {
+            _server.Stop();
         }
     }
 

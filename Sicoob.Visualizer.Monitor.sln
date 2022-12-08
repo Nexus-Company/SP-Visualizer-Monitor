@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor", "Sicoob.Visualizer.Monitor\Sicoob.Visualizer.Monitor.csproj", "{1E491A63-CD92-46ED-9294-7B6D953BBBB2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Service", "Sicoob.Visualizer.Monitor.Service\Sicoob.Visualizer.Monitor.Service.csproj", "{53E5370C-B035-4D29-94EF-2BD28649260D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Comuns", "Sicoob.Visualizer.Monitor.Comuns\Sicoob.Visualizer.Monitor.Comuns.csproj", "{4C44CC6E-B081-421A-BF32-EEB297941DB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Wpf", "Sicoob.Visualizer.Monitor\Sicoob.Visualizer.Monitor.Wpf.csproj", "{7EB911F6-4D98-452D-9E51-9F2402D8FA1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1E491A63-CD92-46ED-9294-7B6D953BBBB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E491A63-CD92-46ED-9294-7B6D953BBBB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E491A63-CD92-46ED-9294-7B6D953BBBB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E491A63-CD92-46ED-9294-7B6D953BBBB2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EB911F6-4D98-452D-9E51-9F2402D8FA1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EB911F6-4D98-452D-9E51-9F2402D8FA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EB911F6-4D98-452D-9E51-9F2402D8FA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EB911F6-4D98-452D-9E51-9F2402D8FA1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

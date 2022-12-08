@@ -1,16 +1,11 @@
 ﻿using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using Sicoob.Visualizer.Monitor.Comuns;
 using Sicoob.Visualizer.Monitor.Comuns.Database.Models;
 using System;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime;
 using System.Threading.Tasks;
-using Process = System.Diagnostics.Process;
-using Prompt = Microsoft.Identity.Client.Prompt;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
@@ -21,6 +16,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         // Client configured with user authentication
         private static GraphServiceClient _userClient;
         private static GraphAuthentication _accessToken;
+        private static Authenticator authenticator;
+
         public static void InitializeGraphForUserAuthAsync(Settings settings)
         {
             _settings = settings;
@@ -33,6 +30,14 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
                 _ = await Task.FromResult(0);
             }));
+
+            try
+            {
+                authenticator = new Authenticator(_settings);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public static async Task GetLoginAsync()
@@ -67,9 +72,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
         private static async Task<AccessToken> GetAuthenticationAsync()
         {
-            var auth = new Authenticator(_settings);
-
-            return await auth.GetAccessAsync();
+            return await authenticator?.GetAccessAsync()
+                ?? throw new Exception();
         }
 
         public static async Task<IGraphServiceDrivesCollectionPage> GetDrivesAsync()
