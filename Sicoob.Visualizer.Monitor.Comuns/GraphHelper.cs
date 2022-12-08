@@ -47,7 +47,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 _accessToken = await ctx.Authentications.FirstAsync();
             }
         }
-
+        public static void RequestLogin()
+            => authenticator.RequestLogin();
         public static async Task SaveLoginAsync()
         {
             var result = await GetAuthenticationAsync();
@@ -72,7 +73,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
         private static async Task<AccessToken> GetAuthenticationAsync()
         {
-            return await authenticator?.GetAccessAsync()
+            RequestLogin(); 
+            return await authenticator?.AwaitLoginAsync()
                 ?? throw new Exception();
         }
 

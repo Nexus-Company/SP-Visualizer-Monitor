@@ -33,31 +33,21 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     {
         private const string monitorServiceName = "SP Visualizer Monitor";
         private readonly PaletteHelper paletteHelper = new();
-        private readonly Thread thAwaitLogin;
-
-
+        private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
-
-
 
         public MainWindow()
         {
             InitializeComponent();
             AppSettings = Settings.LoadSettings();
             thAwaitLogin = new(Login);
-            GraphHelper.InitializeGraphForUserAuthAsync(AppSettings);
 
+            GraphHelper.InitializeGraphForUserAuthAsync(AppSettings);
             ITheme theme = paletteHelper.GetTheme();
             theme.SetBaseTheme(Theme.Dark);
         }
-
-        private void Window_ContentRendered(object sender, EventArgs e)
-            => thAwaitLogin.Start();
-
         private async void Login()
         {
-            //Declarando a classe ServiceController e preenchendo um array com todos os serviços
-            //do windows usando o método GetServices()
             ServiceController? service = ServiceController
                 .GetServices()
                 .FirstOrDefault(service => service.DisplayName == monitorServiceName);
@@ -84,11 +74,18 @@ namespace Sicoob.Visualizer.Monitor.Wpf
 
             await GraphHelper.SaveLoginAsync();
 
+            if (service?.Status == ServiceControllerStatus.Running)
+                service.Stop();
+
+            service?.Start();
+
             await Application.Current.Dispatcher
                 .BeginInvoke(DispatcherPriority.Background, () => Close());
         }
+
+        private void Window_ContentRendered(object sender, EventArgs e)
+           => thAwaitLogin.Start();
+        private void hpReOpen_RequestNavigate(object sender, RequestNavigateEventArgs e)
+           => GraphHelper.RequestLogin();
     }
-
-
 }
-

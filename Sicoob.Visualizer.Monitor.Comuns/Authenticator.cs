@@ -24,7 +24,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             _server.Prefixes.Add(settings.RedirectUrl);
             _server.Start();
         }
-        public async Task<AccessToken> GetAccessAsync()
+        public void RequestLogin()
         {
             string url = $"{baseOAuth}authorize?grant_type=client_credentials&" +
                 $"client_id={HttpUtility.UrlEncode(_settings.ClientId)}&" +
@@ -39,7 +39,9 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 UseShellExecute = true,
                 Verb = "open"
             });
-
+        }
+        public async Task<AccessToken> AwaitLoginAsync()
+        {
             while (_access == null)
             {
                 HttpListenerContext ctx = _server.GetContext();
@@ -59,7 +61,6 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                     resp.StatusCode = (int)HttpStatusCode.OK;
                     resp.StatusDescription = "Status OK";
 
-                    url = $"{baseOAuth}token";
                     string content = "grant_type=client_credentials&" +
                         $"client_id={HttpUtility.UrlEncode(_settings.ClientId)}&" +
                         $"scope={HttpUtility.UrlEncode("https://graph.microsoft.com/.default")} offline_access&" +
@@ -67,7 +68,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                         $"client_secret={HttpUtility.UrlEncode(_settings.ClientSecret)}";
                     HttpClient httpClient = new HttpClient();
 
-                    var request = new HttpRequestMessage(HttpMethod.Post, url)
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"{baseOAuth}token")
                     {
                         Content = new StringContent(content, Encoding.UTF8, "application/x-www-form-urlencoded")
                     };
