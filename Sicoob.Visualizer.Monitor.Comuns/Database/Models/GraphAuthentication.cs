@@ -9,9 +9,10 @@ namespace Sicoob.Visualizer.Monitor.Comuns.Database.Models
 {
     public class GraphAuthentication
     {
+        [Key]
+        public int Id { get; set; } 
         [StringLength(100)]
         public string TokenType { get; set; }
-        [Key]
         [StringLength(2500)]
         public string AccessToken { get; set; }
         [StringLength(2500)]

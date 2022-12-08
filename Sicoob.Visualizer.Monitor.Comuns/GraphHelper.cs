@@ -3,6 +3,7 @@ using Microsoft.Identity.Client;
 using Sicoob.Visualizer.Monitor.Comuns;
 using Sicoob.Visualizer.Monitor.Comuns.Database.Models;
 using System;
+using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,20 +20,27 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         private static Settings _settings;
         // Client configured with user authentication
         private static GraphServiceClient _userClient;
-        private static string _accessToken;
+        private static GraphAuthentication _accessToken;
         public static void InitializeGraphForUserAuthAsync(Settings settings)
         {
             _settings = settings;
 
             _userClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
             {
-                //if (string.IsNullOrEmpty(_accessToken))
-                //    _accessToken = await GetAccessToken(settings);
-
                 requestMessage
                 .Headers
-                .Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+                .Authorization = new AuthenticationHeaderValue(_accessToken.TokenType, _accessToken.AccessToken);
+
+                _ = await Task.FromResult(0);
             }));
+        }
+
+        public static async Task GetLoginAsync()
+        {
+            using (var ctx = _settings.GetContext())
+            {
+                _accessToken = await ctx.Authentications.FirstAsync();
+            }
         }
 
         public static async Task SaveLoginAsync()
@@ -43,23 +51,17 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             {
                 await ctx.Database.ExecuteSqlCommandAsync("TRUNCATE TABLE [GraphAuthentications]");
 
-                ctx.Authentications.Add(new GraphAuthentication()
+                _accessToken = new GraphAuthentication()
                 {
                     //ExpiresOn = result.ExpiresOn,
                     AccessToken = result.Access_token,
                     RefreshToken = result.Refresh_token,
                     TokenType = result.Token_type
-                });
+                };
 
-                try
-                {
-                    await ctx.SaveChangesAsync();
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
+                ctx.Authentications.Add(_accessToken);
 
-                    throw;
-                }
+                await ctx.SaveChangesAsync();
             }
         }
 

@@ -50,6 +50,11 @@
     <Compile Include="Database\Models\GraphAuthentication.cs" />
     <Compile Include="Database\MonitorContext.cs" />
     <Compile Include="GraphHelper.cs" />
+    <Compile Include="Migrations\202212080220121_add_authentication.cs" />
+    <Compile Include="Migrations\202212080220121_add_authentication.designer.cs">
+      <DependentUpon>202212080220121_add_authentication.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
@@ -72,6 +77,11 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.2</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202212080220121_add_authentication.resx">
+      <DependentUpon>202212080220121_add_authentication.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

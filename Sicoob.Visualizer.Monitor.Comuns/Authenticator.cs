@@ -44,7 +44,6 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 Verb = "open"
             });
 
-
             while (_access == null)
             {
                 HttpListenerContext ctx = _server.GetContext();

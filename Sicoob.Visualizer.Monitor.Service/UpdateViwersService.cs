@@ -32,6 +32,8 @@ namespace Sicoob.Visualizer.Monitor.Service
         public void Start()
         {
             GraphHelper.InitializeGraphForUserAuthAsync(Settings);
+            GraphHelper.GetLoginAsync()
+                .Wait();
             ThreadService.Start();
         }
         protected override void OnStart(string[] args)
