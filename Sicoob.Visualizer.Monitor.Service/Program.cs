@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Sicoob.Visualizer.Monitor.Comuns;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sicoob.Visualizer.Monitor.Service
 {

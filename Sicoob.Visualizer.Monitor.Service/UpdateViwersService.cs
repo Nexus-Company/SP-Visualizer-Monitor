@@ -1,5 +1,5 @@
 ﻿using Microsoft.Toolkit.Uwp.Notifications;
-using Sicoob.Visualizer.Monitor.Dal;
+using Sicoob.Visualizer.Monitor.Comuns;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,25 +12,26 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static Sicoob.Visualizer.Monitor.Comuns.Settings;
+
 namespace Sicoob.Visualizer.Monitor.Service
 {
     public partial class UpdateViwersService : ServiceBase
     {
         public Settings Settings { get; set; }
+        public LastHourly LastUpdateHourly { get; set; }
         private Thread ThreadService { get; set; }
-        private MonitorContext ctx;
         public UpdateViwersService(Settings settings)
         {
             InitializeComponent();
             Settings = settings;
-            ctx = new MonitorContext();
-            ThreadService = new Thread(()
-                => ServiceAsync().Wait());
+            LastUpdateHourly = new LastHourly();
+            ThreadService = new Thread(() => ServiceAsync().Wait());
         }
 
         public void Start()
         {
-            InitializeGraph();
+            GraphHelper.InitializeGraphForUserAuthAsync(Settings);
             ThreadService.Start();
         }
         protected override void OnStart(string[] args)
@@ -46,18 +47,26 @@ namespace Sicoob.Visualizer.Monitor.Service
         {
             while (true)
             {
+                var timeTables = GetSchedules();
+
+                if (!CheckHourly(timeTables, out Hourly actualHourly))
+                    continue;
+
                 try
                 {
+                    eventLog.WriteEntry("Get Drive");
                     var drive = (await GraphHelper.GetDrivesAsync()).First();
                     //var strReader = new StreamReader(await GraphHelper.GetReportsAsync());
                     //var text = strReader.ReadToEnd();
-
                     notifyNewRelatorio();
+                    eventLog.WriteEntry("Started ok");
                 }
                 catch (Exception ex)
                 {
-
+                    eventLog.WriteEntry(ex.Message);
                 }
+
+                LastUpdateHourly = new LastHourly(actualHourly);
             }
         }
 
@@ -77,17 +86,42 @@ namespace Sicoob.Visualizer.Monitor.Service
                          )
                         .Show();
         }
-        void InitializeGraph()
+
+        private bool CheckHourly(Hourly[] timeTables, out Hourly actual)
         {
-            GraphHelper.InitializeGraphForUserAuthAsync(Settings, (info, cancel) =>
-           {
-               // Display the device code message to
-               // the user. This tells them
-               // where to go to sign in and provides the
-               // code to use.
-               Console.WriteLine(info.Message);
-               return Task.FromResult(0);
-           });
+            var last = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+            foreach (var item in timeTables)
+            {
+                if (item.Time > LastUpdateHourly.Time &&
+                    last > item.Time &&
+                    item.DaysOfWeek.Contains(DateTime.Now.DayOfWeek) &&
+                    item.DaysOfWeek.Select(dayOfWeek => dayOfWeek >= LastUpdateHourly.DayOfWeek).Contains(true))
+                {
+                    actual = item;
+                    return true;
+                }
+            }
+
+            actual = null;
+            return false;
+        }
+
+        public class LastHourly
+        {
+            public TimeSpan Time { get; set; }
+            public DayOfWeek DayOfWeek { get; set; }
+
+            public LastHourly()
+            {
+                Time = new TimeSpan(0, 0, 0);
+                DayOfWeek = DayOfWeek.Monday;
+            }
+
+            public LastHourly(Hourly hourly)
+            {
+                Time = hourly.Time;
+                DayOfWeek = hourly.DaysOfWeek.First(fs => fs >= DateTime.Now.DayOfWeek);
+            }
         }
     }
 }

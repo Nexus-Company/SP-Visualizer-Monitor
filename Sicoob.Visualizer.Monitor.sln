@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Service", "Sicoob.Visualizer.Monitor.Service\Sicoob.Visualizer.Monitor.Service.csproj", "{53E5370C-B035-4D29-94EF-2BD28649260D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Dal", "Sicoob.Visualizer.Monitor.Dal\Sicoob.Visualizer.Monitor.Dal.csproj", "{4AD1B4DA-9E44-4CB8-9027-31C4B3860525}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sicoob.Visualizer.Monitor.Comuns", "Sicoob.Visualizer.Monitor.Comuns\Sicoob.Visualizer.Monitor.Comuns.csproj", "{4C44CC6E-B081-421A-BF32-EEB297941DB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53E5370C-B035-4D29-94EF-2BD28649260D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4AD1B4DA-9E44-4CB8-9027-31C4B3860525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4AD1B4DA-9E44-4CB8-9027-31C4B3860525}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4AD1B4DA-9E44-4CB8-9027-31C4B3860525}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4AD1B4DA-9E44-4CB8-9027-31C4B3860525}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C44CC6E-B081-421A-BF32-EEB297941DB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
