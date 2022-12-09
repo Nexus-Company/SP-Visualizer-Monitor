@@ -1,19 +1,34 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Sicoob.Visualizer.Monitor.Comuns.Database;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
     public class Settings
     {
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string TenantId { get; set; }
-        public string AuthTenant { get; set; }
-        public string RedirectUrl { get; set; }
-        public string[] GraphUserScopes { get; set; }
+        private static string settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+        public OAuthSettings OAuth { get; set; }
 
+        public bool Notifications
+        {
+            get => (bool)JObject.Parse(File.ReadAllText(settingsPath))["Notifications"];
+            set
+            {
+                JObject obj = JObject.Parse(File.ReadAllText(settingsPath));
+
+                if ((bool)obj["Notifications"] != value)
+                {
+                    obj.Remove("Notifications");
+                    obj["Notifications"] = value;
+
+                    File.WriteAllText(settingsPath, obj.ToString());
+                }
+            }
+        }
         private string _conn;
         public MonitorContext GetContext()
             => new MonitorContext(_conn);
@@ -23,15 +38,12 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             // Load settings
             IConfiguration config = new ConfigurationBuilder()
                 // appsettings.json is required
-                .AddJsonFile("appsettings.json", optional: false)
-                // appsettings.Development.json" is optional, values override appsettings.json
-                .AddJsonFile($"appsettings.Development.json", optional: true)
+                .AddJsonStream(new MemoryStream(File.ReadAllBytes(settingsPath)))
                 .Build();
 
-            var settings = config.GetRequiredSection("Settings").Get<Settings>();
+            var settings = config.Get<Settings>();
 
             settings._conn = config.GetConnectionString("SqlServer");
-
             return settings;
         }
 
@@ -77,6 +89,16 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 Time = time;
                 DaysOfWeek = daysOfWeek ?? throw new ArgumentNullException(nameof(daysOfWeek));
             }
+        }
+
+        public class OAuthSettings
+        {
+            public string ClientId { get; set; }
+            public string ClientSecret { get; set; }
+            public string TenantId { get; set; }
+            public string AuthTenant { get; set; }
+            public string RedirectUrl { get; set; }
+            public string[] GraphUserScopes { get; set; }
         }
     }
 }

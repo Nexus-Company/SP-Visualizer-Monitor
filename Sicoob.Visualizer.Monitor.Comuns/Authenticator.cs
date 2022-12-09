@@ -6,18 +6,19 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 using Process = System.Diagnostics.Process;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
     internal class Authenticator : IDisposable
     {
-        private Settings _settings;
+        private OAuthSettings _settings;
         private HttpListener _server;
         private AccessToken _access;
         private string baseOAuth
             => $"https://login.microsoftonline.com/organizations/oauth2/v2.0/";
-        public Authenticator(Settings settings)
+        public Authenticator(OAuthSettings settings)
         {
             _settings = settings;
             _server = new HttpListener();

@@ -1,0 +1,146 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks" 
+        xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="Sicoob.Visualizer.Monitor.Wpf.MainScreen" 
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Title="Esperando Login" Height="620" Width="930"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True"
+        Background="{x:Null}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+    <Border Background="#fafafa" CornerRadius="30" >
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Menu -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Menu Icon -->
+                <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20 28 0 35" Style="{StaticResource topButton}" Cursor="Hand">
+                    <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
+                </Button>
+
+                <Border Grid.Row="1" Background="#00723a" CornerRadius="29 0 0 29">
+                    <DockPanel>
+                        <!-- Menu Logo -->
+                        <Border Width="80" Height="80" Padding="3" Background="White" CornerRadius="100"
+                                DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 20 0 0">
+                            <Ellipse>
+                                <Ellipse.Fill>
+                                    <ImageBrush />
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Border>
+
+                        <!-- Menu Titles -->
+                        <TextBlock Text="Juan Doug..." Foreground="White" FontSize="25" FontWeight="SemiBold" 
+                                   DockPanel.Dock="Top" TextAlignment="Center" Margin="35 25 35 10"/>
+                        <TextBlock Text="juandouglas204@gmail.com" Foreground="#c0ccc4" FontSize="12" FontWeight="SemiBold" 
+                                   DockPanel.Dock="Top" TextAlignment="Center" />
+
+                        <!-- Menu Seperator-->
+                        <Separator Margin="25" DockPanel.Dock="Top" Height="2" Background="#003d1f"/>
+
+                        <!-- Menu Buttons -->
+                        <StackPanel DockPanel.Dock="Top">
+                            <Button Style="{StaticResource menuButton}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Icon:PackIconMaterial Kind="Lightbulb" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Recentes"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource menuButton}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Icon:PackIconMaterial Kind="Calendar" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Agendamentos"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource menuButton}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Icon:PackIconMaterial Kind="AccountMultipleOutline" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Usuários"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <Button Style="{StaticResource menuButton}" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Margin="15 0 15 20" Click="Logout_Click" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Icon:PackIconMaterial Kind="Logout" Style="{StaticResource menuButtonIcon}"/>
+                                <TextBlock Text="Logout"/>
+                            </StackPanel>
+                        </Button>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="1" Margin="30 20 20 20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Search Textbox -->
+                <Grid Width="300" HorizontalAlignment="Left" Grid.Row="4">
+                    <TextBlock Margin="20 0" VerticalAlignment="Center" Foreground="#b0b9c6" IsHitTestVisible="False"
+                               Panel.ZIndex="1" Text="Procurando por..."
+                               Visibility="{Binding Text.IsEmpty, Converter={StaticResource BoolToVis}, ElementName=txtSearch}" />
+
+                    <TextBox x:Name="txtSearch" Style="{StaticResource textboxSearch}" />
+
+                    <Icon:PackIconMaterial Kind="Magnify" Width="15" Height="15" VerticalAlignment="Center" 
+                                           Margin="0 0 15 0" Foreground="#b0b9c6" HorizontalAlignment="Right"/>
+                </Grid>
+
+                <Button Style="{StaticResource exitButton}" HorizontalAlignment="Right" Click="Exit_Click" Cursor="Hand">
+                    <Icon:PackIconMaterial Kind="Close" Width="20" Height="20"/>
+                </Button>
+
+                <Button Style="{StaticResource topButton}" Margin="0 0 70 0" Background="#dcdcdc" HorizontalAlignment="Right">
+                    <Icon:PackIconMaterial Kind="Cog"/>
+                </Button>
+
+                <Button Style="{StaticResource topButton}" Click="Notifications_Change" Margin="0 0 110 0" Background="#dcdcdc" HorizontalAlignment="Right">
+                    <Icon:PackIconMaterial Kind="Bell" x:Name="BellNotifications"/>
+                </Button>
+
+                <!-- Page title -->
+                <TextBlock Text="Ultimos Acessos" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Margin="0"
+                           HorizontalAlignment="Left" Foreground="#121518"/>
+
+                <!-- Refresh Button -->
+                <Button Style="{StaticResource refreshButton}" Grid.Row="4" Cursor="Hand">
+                    <StackPanel Orientation="Horizontal">
+                        <Icon:PackIconMaterial Kind="Refresh" VerticalAlignment="Center" Width="11" Height="11" Margin="0 0 10 0"/>
+                        <TextBlock Text="Atualizar Acessos"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Separator -->
+                <Separator Height="1" Grid.Row="3" Background="#dae2ea" Margin="0 10 0 10"/>
+
+                <!-- Tab Buttons -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
+                    <Button Content="Acessos" Style="{StaticResource tabButton}" BorderBrush="#00be60"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

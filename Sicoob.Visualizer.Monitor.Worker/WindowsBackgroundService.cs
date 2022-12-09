@@ -1,69 +1,50 @@
-ï»¿using Microsoft.Toolkit.Uwp.Notifications;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
-using System;
 using System.Data;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
-using System.Threading;
-using System.Threading.Tasks;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 
-namespace Sicoob.Visualizer.Monitor.Service
+namespace Sicoob.Visualizer.Monitor.Worker
 {
-    public partial class UpdateViwersService : ServiceBase
+    public class WindowsBackgroundService : BackgroundService
     {
+        private readonly ILogger<WindowsBackgroundService> _logger;
         public Settings Settings { get; set; }
         public LastHourly LastUpdateHourly { get; set; }
-        private Thread ThreadService { get; set; }
-        public UpdateViwersService(Settings settings)
+        public GraphHelper Helper { get; set; }
+
+        public WindowsBackgroundService(ILogger<WindowsBackgroundService> logger)
         {
-            InitializeComponent();
-            Settings = settings;
+            _logger = logger;
             LastUpdateHourly = new LastHourly();
-            ThreadService = new Thread(() => ServiceAsync().Wait());
+            Settings = LoadSettings();
+            Helper = new(Settings.OAuth, Settings.GetContext());
         }
 
-        public void Start()
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            GraphHelper.InitializeGraphForUserAuthAsync(Settings);
-            GraphHelper.GetLoginAsync()
-                .Wait();
-            ThreadService.Start();
-        }
-        protected override void OnStart(string[] args)
-            => Start();
+            _logger.Log(LogLevel.Information, "Service start Success!");
 
-        protected override void OnStop()
-        {
-            //threadAtiva = false;
-            //    threadControle.Join();
-        }
-
-        async Task ServiceAsync()
-        {
-            new ToastContentBuilder()
+            if (Settings.Notifications)
+                new ToastContentBuilder()
                       .AddArgument("action", "viewConversation")
                       .AddArgument("conversationId", 9813)
                       .AddText("Monitoramento")
-                      .AddText("O monitoramenteo do Sharepoint foi iniciado.")
-                      .Show();
+                      .AddText("O monitoramenteo do Sharepoint foi iniciado.");
 
             while (true)
             {
                 var timeTables = GetSchedules();
 
-                if (!CheckHourly(timeTables, out Hourly actualHourly))
+                if (!CheckHourly(timeTables, out Hourly? actualHourly))
                     continue;
 
                 try
                 {
-                    eventLog.WriteEntry("Get Drive");
-                    var drive = (await GraphHelper.GetDrivesAsync()).First();
+
+                    //var drive = (await Helper.GetDrivesAsync()).First();
                     //var strReader = new StreamReader(await GraphHelper.GetReportsAsync());
                     //var text = strReader.ReadToEnd();
                     notifyNewRelatorio();
-                    eventLog.WriteEntry("Started ok");
                 }
                 catch (Microsoft.Graph.ServiceException ex)
                 {
@@ -71,7 +52,7 @@ namespace Sicoob.Visualizer.Monitor.Service
                 }
                 catch (Exception ex)
                 {
-                    eventLog.WriteEntry(ex.Message);
+                    _logger.Log(LogLevel.Error, ex.Message);
                 }
 
                 LastUpdateHourly = new LastHourly(actualHourly);
@@ -82,20 +63,22 @@ namespace Sicoob.Visualizer.Monitor.Service
         {
             var imageUri = Path.GetFullPath(@"Assets\Image\relatorio.png");
 
-            new ToastContentBuilder()
+            if (Settings.Notifications)
+                new ToastContentBuilder()
                         .AddArgument("action", "viewConversation")
                         .AddArgument("conversationId", 9813)
-                        .AddText("Novo relatÃ³rio disponÃ­vel")
-                        .AddText("Foi gerado um novo relatÃ³rio de atividade dos arquivos no Sharepoint, clique no botÃ£o abaixo para acessa-lo.")
+                        .AddText("Novo relatório disponível")
+                        .AddText("Foi gerado um novo relatório de atividade dos arquivos no Sharepoint, clique no botão abaixo para acessa-lo.")
                         //.AddInlineImage(new Uri(imageUri))
                         .AddButton(new ToastButton()
-                            .SetContent("Abrir relatÃ³rio")
+                            .SetContent("Abrir relatório")
                             .SetProtocolActivation(new Uri("https://localhost:80"))
-                         )
-                        .Show();
+                         );
+
+
         }
 
-        private bool CheckHourly(Hourly[] timeTables, out Hourly actual)
+        private bool CheckHourly(Hourly[] timeTables, out Hourly? actual)
         {
             var last = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
             foreach (var item in timeTables)
@@ -125,8 +108,16 @@ namespace Sicoob.Visualizer.Monitor.Service
                 DayOfWeek = DayOfWeek.Monday;
             }
 
-            public LastHourly(Hourly hourly)
+            public LastHourly(Hourly? hourly)
             {
+                if (hourly == null)
+                {
+                    Time = new TimeSpan(0, 0, 0);
+                    DayOfWeek = DayOfWeek.Monday;
+
+                    return;
+                }
+
                 Time = hourly.Time;
                 DayOfWeek = hourly.DaysOfWeek.First(fs => fs >= DateTime.Now.DayOfWeek);
             }

@@ -12,19 +12,20 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SplashScreen : Window
     {
-        private const string monitorServiceName = "SP Visualizer Monitor";
+        private const string monitorServiceName = "SP Visualizer Worker";
         private readonly PaletteHelper paletteHelper = new();
         private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
-        public MainWindow()
+        public GraphHelper Helper { get; set; }
+        public SplashScreen()
         {
             InitializeComponent();
             AppSettings = Settings.LoadSettings();
             thAwaitLogin = new(Login);
+            Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext(), true);
 
-            GraphHelper.InitializeGraphForUserAuthAsync(AppSettings);
             ITheme theme = paletteHelper.GetTheme();
             theme.SetBaseTheme(Theme.Dark);
         }
@@ -32,14 +33,15 @@ namespace Sicoob.Visualizer.Monitor.Wpf
         {
             bool logued =
 #if DEBUG
-                true;
+                false;
 #else 
                 false;
 #endif
 
             try
             {
-                await GraphHelper.GetLoginAsync();
+                await Helper.GetLoginAsync();
+                logued = true;
             }
             catch (Exception)
             {
@@ -50,7 +52,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
             {
                 await ChangeStatusAsync("Esperando autorização...");
 
-                await GraphHelper.SaveLoginAsync();
+                await Helper.SaveLoginAsync();
             }
 
             //var drivers = await GraphHelper.GetDrivesAsync();
@@ -71,7 +73,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                     RedirectStandardError = true,
                     Verb = "runas",
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    Arguments = $"create \"{monitorServiceName}\" binPath= \"{Path.GetFullPath(@"Visualizer Monitor.exe")}\" start=auto"
+                    Arguments = $"create \"{monitorServiceName}\" binPath= \"{Path.GetFullPath(@"Sicoob.Visualizer.Monitor.Worker.exe")}\" start=auto"
                 };
 
                 Process.Start(psi);
@@ -84,14 +86,15 @@ namespace Sicoob.Visualizer.Monitor.Wpf
             if (service?.Status == ServiceControllerStatus.Running)
                 service.Stop();
 
-            //service?.Start();
-            //service?.WaitForStatus(ServiceControllerStatus.Running);
+            service?.Start();
+            service?.WaitForStatus(ServiceControllerStatus.Running);
 
             await Application.Current.Dispatcher
                 .BeginInvoke(DispatcherPriority.Background, () =>
                 {
-
+                    MainScreen ms = new();
                     Close();
+                    ms.Show();
                 });
         }
 
@@ -101,11 +104,14 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                 {
                     txtStatus.Text = text;
                 });
-
-
         private void Window_ContentRendered(object sender, EventArgs e)
            => thAwaitLogin.Start();
         private void hpReOpen_RequestNavigate(object sender, RequestNavigateEventArgs e)
-           => GraphHelper.RequestLogin();
+           => Helper.RequestLogin();
+
+        protected override void OnClosed(EventArgs e)
+        {
+            Helper.Dispose();
+        }
     }
 }

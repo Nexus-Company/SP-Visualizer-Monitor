@@ -1,24 +1,24 @@
-﻿using Microsoft.Graph;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Graph;
+using Sicoob.Visualizer.Monitor.Comuns.Database;
 using Sicoob.Visualizer.Monitor.Comuns.Database.Models;
-using System;
-using System.Data.Entity;
-using System.IO;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
-    public class GraphHelper
+    public class GraphHelper : IDisposable
     {
         // Settings object
-        private static Settings _settings;
+        private readonly OAuthSettings _settings;
         // Client configured with user authentication
-        private static GraphServiceClient _userClient;
-        private static GraphAuthentication _accessToken;
-        private static Authenticator authenticator;
-
-        public static void InitializeGraphForUserAuthAsync(Settings settings)
+        private readonly GraphServiceClient _userClient;
+        private GraphAuthentication? _accessToken;
+        private readonly Authenticator? _authenticator;
+        private readonly MonitorContext ctx;
+        public GraphHelper(OAuthSettings settings, MonitorContext ctx, bool authenticator = false)
         {
+            this.ctx = ctx;
             _settings = settings;
 
             _userClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
@@ -30,57 +30,51 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 _ = await Task.FromResult(0);
             }));
 
-            try
-            {
-                authenticator = new Authenticator(_settings);
-            }
-            catch (Exception)
-            {
-            }
+            if (authenticator)
+                _authenticator = new Authenticator(_settings);
         }
 
-        public static async Task GetLoginAsync()
+        public async Task GetLoginAsync()
         {
-            using (var ctx = _settings.GetContext())
-            {
-                _accessToken = await ctx.Authentications.FirstAsync();
-            }
+            _accessToken = await ctx.Authentications.FirstAsync();
         }
-        public static void RequestLogin()
-            => authenticator.RequestLogin();
-        public static async Task SaveLoginAsync()
+
+        public void RequestLogin()
+            => _authenticator.RequestLogin();
+        public async Task SaveLoginAsync()
         {
             var result = await GetAuthenticationAsync();
 
-            using (var ctx = _settings.GetContext())
+            _accessToken = new GraphAuthentication()
             {
-                await ctx.Database.ExecuteSqlCommandAsync("TRUNCATE TABLE [GraphAuthentications]");
+                //ExpiresOn = result.ExpiresOn,
+                AccessToken = result.Access_token,
+                RefreshToken = result.Refresh_token,
+                TokenType = result.Token_type
+            };
 
-                _accessToken = new GraphAuthentication()
-                {
-                    //ExpiresOn = result.ExpiresOn,
-                    AccessToken = result.Access_token,
-                    RefreshToken = result.Refresh_token,
-                    TokenType = result.Token_type
-                };
+            ctx.Authentications.Add(_accessToken);
 
-                ctx.Authentications.Add(_accessToken);
-
-                await ctx.SaveChangesAsync();
-            }
+            await ctx.SaveChangesAsync();
         }
 
-        private static async Task<AccessToken> GetAuthenticationAsync()
+        private async Task<AccessToken> GetAuthenticationAsync()
         {
             RequestLogin();
-            return await authenticator?.AwaitLoginAsync()
-                ?? throw new Exception();
+            return await _authenticator?.AwaitLoginAsync() ?? throw new Exception();
         }
 
-        public static async Task<IGraphServiceDrivesCollectionPage> GetDrivesAsync()
+        public async Task<IGraphServiceDrivesCollectionPage> GetDrivesAsync()
              => await _userClient.Drives.Request().GetAsync();
 
-        public static async Task<Stream> GetReportsAsync()
+        public async Task<Stream> GetReportsAsync()
             => await _userClient.Reports.GetSharePointActivityFileCounts("D7").Request().GetAsync();
+
+        public void Dispose()
+        {
+            ctx.Dispose();
+            _authenticator?.Dispose();
+            GC.SuppressFinalize(this);
+        }
     }
 }
