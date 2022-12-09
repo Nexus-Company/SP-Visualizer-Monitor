@@ -42,6 +42,13 @@ namespace Sicoob.Visualizer.Monitor.Service
 
         async Task ServiceAsync()
         {
+            new ToastContentBuilder()
+                      .AddArgument("action", "viewConversation")
+                      .AddArgument("conversationId", 9813)
+                      .AddText("Monitoramento")
+                      .AddText("O monitoramenteo do Sharepoint foi iniciado.")
+                      .Show();
+
             while (true)
             {
                 var timeTables = GetSchedules();
@@ -58,9 +65,9 @@ namespace Sicoob.Visualizer.Monitor.Service
                     notifyNewRelatorio();
                     eventLog.WriteEntry("Started ok");
                 }
-                catch (Microsoft.Graph.ServiceException ex) 
-                { 
-                
+                catch (Microsoft.Graph.ServiceException ex)
+                {
+
                 }
                 catch (Exception ex)
                 {

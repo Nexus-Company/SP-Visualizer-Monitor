@@ -16,7 +16,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         private HttpListener _server;
         private AccessToken _access;
         private string baseOAuth
-            => $"https://login.microsoftonline.com/common/oauth2/v2.0/";
+            => $"https://login.microsoftonline.com/organizations/oauth2/v2.0/";
         public Authenticator(Settings settings)
         {
             _settings = settings;

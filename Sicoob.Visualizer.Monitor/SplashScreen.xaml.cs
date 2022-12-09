@@ -1,26 +1,9 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Sicoob.Visualizer.Monitor.Comuns;
-using System;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration.Install;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using Path = System.IO.Path;
 
@@ -35,7 +18,6 @@ namespace Sicoob.Visualizer.Monitor.Wpf
         private readonly PaletteHelper paletteHelper = new();
         private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -48,9 +30,36 @@ namespace Sicoob.Visualizer.Monitor.Wpf
         }
         private async void Login()
         {
+            bool logued =
+#if DEBUG
+                true;
+#else 
+                false;
+#endif
+
+            try
+            {
+                await GraphHelper.GetLoginAsync();
+            }
+            catch (Exception)
+            {
+
+            }
+
+            if (!logued)
+            {
+                await ChangeStatusAsync("Esperando autorização...");
+
+                await GraphHelper.SaveLoginAsync();
+            }
+
+            //var drivers = await GraphHelper.GetDrivesAsync();
+
+            await ChangeStatusAsync("Inciando o serviço...");
+
             ServiceController? service = ServiceController
-                .GetServices()
-                .FirstOrDefault(service => service.DisplayName == monitorServiceName);
+               .GetServices()
+               .FirstOrDefault(service => service.DisplayName == monitorServiceName);
 
             if (service == null)
             {
@@ -72,16 +81,27 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                     .FirstOrDefault(service => service.DisplayName == monitorServiceName);
             }
 
-            await GraphHelper.SaveLoginAsync();
-
             if (service?.Status == ServiceControllerStatus.Running)
                 service.Stop();
 
-            service?.Start();
+            //service?.Start();
+            //service?.WaitForStatus(ServiceControllerStatus.Running);
 
             await Application.Current.Dispatcher
-                .BeginInvoke(DispatcherPriority.Background, () => Close());
+                .BeginInvoke(DispatcherPriority.Background, () =>
+                {
+
+                    Close();
+                });
         }
+
+        private async Task ChangeStatusAsync(string text)
+            => await Application.Current.Dispatcher
+                .BeginInvoke(DispatcherPriority.Background, () =>
+                {
+                    txtStatus.Text = text;
+                });
+
 
         private void Window_ContentRendered(object sender, EventArgs e)
            => thAwaitLogin.Start();

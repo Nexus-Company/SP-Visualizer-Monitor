@@ -4,7 +4,6 @@ using System;
 using System.Data.Entity;
 using System.IO;
 using System.Net.Http.Headers;
-using System.Runtime;
 using System.Threading.Tasks;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
@@ -73,7 +72,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
         private static async Task<AccessToken> GetAuthenticationAsync()
         {
-            RequestLogin(); 
+            RequestLogin();
             return await authenticator?.AwaitLoginAsync()
                 ?? throw new Exception();
         }
