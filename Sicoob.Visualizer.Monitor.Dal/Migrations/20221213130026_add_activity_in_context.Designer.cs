@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sicoob.Visualizer.Monitor.Dal;
 
@@ -11,9 +12,10 @@ using Sicoob.Visualizer.Monitor.Dal;
 namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 {
     [DbContext(typeof(MonitorContext))]
-    partial class MonitorContextModelSnapshot : ModelSnapshot
+    [Migration("20221213130026_add_activity_in_context")]
+    partial class add_activity_in_context
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,7 +68,7 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(320)");
 
-                    b.HasKey("Id", "Target", "Type", "Date");
+                    b.HasKey("Id", "Target", "Type");
 
                     b.HasIndex("Target");
 
@@ -120,11 +122,6 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                     b.Property<string>("Id")
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WebUrl")
                         .IsRequired()

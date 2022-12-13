@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Sicoob.Visualizer.Monitor.Comuns.Database;
+using Sicoob.Visualizer.Monitor.Dal;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -31,7 +32,14 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         }
         private string _conn;
         public MonitorContext GetContext()
-            => new MonitorContext(_conn);
+        {
+            var ctx = new MonitorContext(_conn);
+
+            if (ctx.Database.GetPendingMigrations().Count() > 1)
+                ctx.Database.Migrate();
+            
+            return ctx;
+        }
 
         public static Settings LoadSettings()
         {
@@ -94,11 +102,9 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         public class OAuthSettings
         {
             public string ClientId { get; set; }
-            public string ClientSecret { get; set; }
-            public string TenantId { get; set; }
-            public string AuthTenant { get; set; }
             public string RedirectUrl { get; set; }
             public string[] GraphUserScopes { get; set; }
+            public string[] SharepointUserScopes { get; set; }
         }
     }
 }

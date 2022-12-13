@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ServiceProcess;
+using System.Windows;
 
 namespace Sicoob.Visualizer.Monitor.Wpf
 {
@@ -7,5 +8,19 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+#if DEBUG
+            using ServiceController? service = ServiceController
+             .GetServices()
+             .FirstOrDefault(service => service.DisplayName == SplashScreen.monitorServiceName);
+
+            if (service?.Status == ServiceControllerStatus.Running)
+            {
+                service?.Stop();
+            }
+#endif
+        }
     }
 }

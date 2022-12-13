@@ -26,28 +26,19 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Menu Icon -->
-                <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20 28 0 35" Style="{StaticResource topButton}" Cursor="Hand">
-                    <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
-                </Button>
-
-                <Border Grid.Row="1" Background="#00723a" CornerRadius="29 0 0 29">
+                <Border Grid.Row="1" Background="#00723a" CornerRadius="29 0 0 29" MaxWidth="200">
                     <DockPanel>
                         <!-- Menu Logo -->
-                        <Border Width="80" Height="80" Padding="3" Background="White" CornerRadius="100"
+                        <Border Name="userColor" Padding="3" Background="#AADDEE" CornerRadius="100"
                                 DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 20 0 0">
-                            <Ellipse>
-                                <Ellipse.Fill>
-                                    <ImageBrush />
-                                </Ellipse.Fill>
-                            </Ellipse>
+                            <TextBlock Name="userInitial" Text="J" Width="110"  TextAlignment="Center" FontSize="80" FontWeight="SemiBold"/>
                         </Border>
 
                         <!-- Menu Titles -->
-                        <TextBlock Text="Juan Doug..." Foreground="White" FontSize="25" FontWeight="SemiBold" 
+                        <TextBlock Name="userName" Text="Juan Doug..." Foreground="White" FontSize="25" FontWeight="SemiBold" MaxWidth="200"
                                    DockPanel.Dock="Top" TextAlignment="Center" Margin="35 25 35 10"/>
-                        <TextBlock Text="juandouglas204@gmail.com" Foreground="#c0ccc4" FontSize="12" FontWeight="SemiBold" 
-                                   DockPanel.Dock="Top" TextAlignment="Center" />
+                        <TextBlock Name="userEmail" Text="juandouglas204@gmail.com" Foreground="#c0ccc4" FontSize="12" FontWeight="SemiBold" 
+                                   DockPanel.Dock="Top" TextAlignment="Center"/>
 
                         <!-- Menu Seperator-->
                         <Separator Margin="25" DockPanel.Dock="Top" Height="2" Background="#003d1f"/>
@@ -86,6 +77,12 @@
                 </Border>
             </Grid>
 
+            <!-- Menu Icon -->
+            <!--
+            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20 28 0 35" Style="{StaticResource topButton}" Cursor="Hand">
+                <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
+            </Button>-->
+
             <Grid Grid.Column="1" Margin="30 20 20 20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -117,12 +114,12 @@
                     <Icon:PackIconMaterial Kind="Cog"/>
                 </Button>
 
-                <Button Style="{StaticResource topButton}" Click="Notifications_Change" Margin="0 0 110 0" Background="#dcdcdc" HorizontalAlignment="Right">
+                <Button Style="{StaticResource topButton}" Click="Notifications_Change" Margin="0 0 110 0" Background="#dcdcdc" HorizontalAlignment="Right" Cursor="Hand">
                     <Icon:PackIconMaterial Kind="Bell" x:Name="BellNotifications"/>
                 </Button>
 
                 <!-- Page title -->
-                <TextBlock Text="Ultimos Acessos" Grid.Row="1" FontSize="32" FontWeight="SemiBold" Margin="0"
+                <TextBlock Text="Atividade recente" Grid.Row="1" FontSize="30" FontWeight="SemiBold" Margin="0"
                            HorizontalAlignment="Left" Foreground="#121518"/>
 
                 <!-- Refresh Button -->
@@ -140,6 +137,75 @@
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
                     <Button Content="Acessos" Style="{StaticResource tabButton}" BorderBrush="#00be60"/>
                 </StackPanel>
+
+                <!-- Members Datagrid-->
+                <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="auto" CanUserResize="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Icon:PackIconMaterial Kind="{Binding IconKind}" Width="15" Height="15" Foreground="#6e7783" Margin="0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Usuário" IsReadOnly="True" Width="auto" CanUserResize="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Padding="3" Background="{Binding BgColor}" CornerRadius="100"
+                                             HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Character}" Width="22.5" Height="22.5" TextAlignment="Center" FontSize="15" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding DisplayName}" TextAlignment="Left" FontSize="16" FontWeight="Light" Margin="10 0 0 0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto"/>
+                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*"/>
+                        <DataGridTemplateColumn Header="Arquivo" IsReadOnly="True" Width="auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock>           
+                                            <Hyperlink NavigateUri="{Binding ItemWebUrl}" RequestNavigate="Hyperlink_RequestNavigate">
+                                                <TextBlock Text="{Binding ItemName}"/>
+                                            </Hyperlink>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Pagination Section -->
+                <Border Grid.Row="6" HorizontalAlignment="Right" BorderBrush="#dee4ec" BorderThickness="1"
+                        CornerRadius="5" Padding="5" Background="White" Margin="0 10 10 10">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource pagingButton}">
+                            <Icon:PackIconMaterial Kind="ChevronLeft" Style="{StaticResource pagingButtonIcon}"/>
+                        </Button>
+
+                        <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
+
+                        <Button Style="{StaticResource pagingButton}" Content="1" Background="#00723a" Foreground="White"/>
+                        <Button Style="{StaticResource pagingButton}" Content="2"/>
+                        <Button Style="{StaticResource pagingButton}" Content="3"/>
+
+                        <TextBlock Text="..." Foreground="#6c7682" VerticalAlignment="Center" FontSize="15" Margin="10 0"/>
+
+                        <Button Style="{StaticResource pagingButton}" Content="7"/>
+                        <Button Style="{StaticResource pagingButton}" Content="8"/>
+                        <Button Style="{StaticResource pagingButton}" Content="9"/>
+
+                        <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
+
+                        <Button Style="{StaticResource pagingButton}">
+                            <Icon:PackIconMaterial Kind="ChevronRight" Style="{StaticResource pagingButtonIcon}"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
     </Border>

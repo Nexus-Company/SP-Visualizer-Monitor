@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Sicoob.Visualizer.Monitor.Wpf"
              xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks" 
-             StartupUri="SplashScreen.xaml">
+             StartupUri="SplashScreen.xaml"
+    xmlns:wpf="clr-namespace:MaterialDesignThemes.Wpf;assembly=MaterialDesignThemes.Wpf">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -37,7 +38,7 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            
+
             <Style x:Key="topButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"></Setter>
                 <Setter Property="Foreground" Value="#6e7783"></Setter>
@@ -155,7 +156,7 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            
+
             <Style x:Key="tabButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="#121518"/>
@@ -183,6 +184,60 @@
                 </Style.Triggers>
             </Style>
 
+            <Style x:Key="pagingButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#6c7682"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="Margin" Value="1 0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="10 5">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 0 0 1"></ContentPresenter>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#00723a"></Setter>
+                        <Setter Property="Foreground" Value="White"></Setter>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="pagingButtonIcon" TargetType="Icon:PackIconMaterial">
+                <Setter Property="Width" Value="10"/>
+                <Setter Property="Height" Value="10"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <!--#region Data Grid-->
+            <Style x:Key="DataGridStyle" TargetType="{x:Type DataGrid}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#222528"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected"/>
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
+                <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+                <Setter Property="AutoGenerateColumns" Value="False"/>
+                <Setter Property="HeadersVisibility" Value="Column"/>
+                <Setter Property="Margin" Value="0 10 0 0"/>
+                <Setter Property="SelectionMode" Value="Single"/>
+                <Setter Property="SelectionUnit" Value="FullRow"/>
+                <Setter Property="CanUserAddRows" Value="False"/>
+                <Setter Property="CanUserDeleteRows" Value="False"/>
+                <Setter Property="CanUserResizeRows" Value="False"/>
+                <Setter Property="CanUserReorderColumns" Value="False"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="ColumnWidth" Value="*"/>
+                <Setter Property="GridLinesVisibility" Value="None"/>
+            </Style>
+            <!--#endregion-->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

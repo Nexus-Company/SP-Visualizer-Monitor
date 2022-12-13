@@ -14,7 +14,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class SplashScreen : Window
     {
-        private const string monitorServiceName = "SP Visualizer Worker";
+        public const string monitorServiceName = "SP Visualizer Worker";
         private readonly PaletteHelper paletteHelper = new();
         private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
@@ -55,7 +55,18 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                 await Helper.SaveLoginAsync();
             }
 
-            //var drivers = await GraphHelper.GetDrivesAsync();
+            await ChangeStatusAsync("Obtendo informações...");
+
+            var account = await Helper.GetAuthenticatedAccountAsync();
+
+            var drive = (await Helper.GetDrivesAsync()).First();
+
+            //if (!logued)
+            //{
+            //    await ChangeStatusAsync("Esperando autorização do Sharepoint...");
+
+            //    await Helper.SaveLoginAsync(new Uri(drive.WebUrl).Host);
+            //}
 
             await ChangeStatusAsync("Inciando o serviço...");
 
@@ -83,16 +94,25 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                     .FirstOrDefault(service => service.DisplayName == monitorServiceName);
             }
 
-            if (service?.Status == ServiceControllerStatus.Running)
-                service.Stop();
+            if (service.Status == ServiceControllerStatus.StopPending)
+            {
+                await ChangeStatusAsync("Esperando resposta do serviço...");
+                service?.WaitForStatus(ServiceControllerStatus.Stopped);
+                await ChangeStatusAsync("Inciando o serviço...");
+            }
 
-            service?.Start();
-            service?.WaitForStatus(ServiceControllerStatus.Running);
+            if (service?.Status != ServiceControllerStatus.Running)
+            {
+                service?.Start();
+                service?.WaitForStatus(ServiceControllerStatus.Running);
+            }
+
+            service?.Dispose();
 
             await Application.Current.Dispatcher
                 .BeginInvoke(DispatcherPriority.Background, () =>
                 {
-                    MainScreen ms = new();
+                    MainScreen ms = new(account);
                     Close();
                     ms.Show();
                 });
@@ -108,7 +128,6 @@ namespace Sicoob.Visualizer.Monitor.Wpf
            => thAwaitLogin.Start();
         private void hpReOpen_RequestNavigate(object sender, RequestNavigateEventArgs e)
            => Helper.RequestLogin();
-
         protected override void OnClosed(EventArgs e)
         {
             Helper.Dispose();

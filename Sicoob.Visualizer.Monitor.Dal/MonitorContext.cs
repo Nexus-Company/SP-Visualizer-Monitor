@@ -11,6 +11,8 @@ public partial class MonitorContext : DbContext
     #region DBSets
     public virtual DbSet<Account> Accounts { get; set; }
     public virtual DbSet<GraphAuthentication> Authentications { get; set; }
+    public virtual DbSet<Activity> Activities { get; set; }
+    public virtual DbSet<Item> Items { get; set; }
     #endregion
 
     /// <summary>
@@ -46,6 +48,9 @@ public partial class MonitorContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<Activity>()
+            .HasKey(act => new { act.Id, act.Target, act.Type, act.Date });
     }
 
     public override void Dispose()

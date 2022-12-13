@@ -1,6 +1,8 @@
 using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
+using Sicoob.Visualizer.Monitor.Dal.Models.Enums;
 using System.Data;
+using static Sicoob.Visualizer.Monitor.Comuns.GraphHelper;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 
 namespace Sicoob.Visualizer.Monitor.Worker
@@ -40,10 +42,12 @@ namespace Sicoob.Visualizer.Monitor.Worker
 
                 try
                 {
+                    await Helper.GetLoginAsync();
 
-                    //var drive = (await Helper.GetDrivesAsync()).First();
-                    //var strReader = new StreamReader(await GraphHelper.GetReportsAsync());
-                    //var text = strReader.ReadToEnd();
+                    await UpdateUsersAsync();
+
+                    await UpdateActivitiesAsync();
+
                     notifyNewRelatorio();
                 }
                 catch (Microsoft.Graph.ServiceException ex)
@@ -57,6 +61,73 @@ namespace Sicoob.Visualizer.Monitor.Worker
 
                 LastUpdateHourly = new LastHourly(actualHourly);
             }
+        }
+
+        private async Task UpdateUsersAsync()
+        {
+            var users = await Helper.GetUsersAsync();
+
+            while (users.Count > 1)
+            {
+                foreach (var user in users)
+                    await Helper.UpdateOrAppendUserAsync(user);
+
+                users.Clear();
+
+                if (users.NextPageRequest != null)
+                    users = await users.NextPageRequest.GetAsync();
+            }
+
+            _logger.Log(LogLevel.Information, "Update accounts Success!");
+        }
+
+        private async Task UpdateActivitiesAsync()
+        {
+            var driver = (await Helper.GetDrivesAsync()).First();
+            var driverId = new Uri(driver.WebUrl).Host;
+
+            var lists = await Helper.GetListsAsync(driverId);
+
+            foreach (var list in lists)
+            {
+                var items = await Helper.GetItemsAsync(driverId, list.Id);
+                bool @continue = false;
+
+                do
+                {
+                    foreach (var item in items)
+                    {
+                        if (item.ContentType.Name == "Folder")
+                            continue;
+
+                        try
+                        {
+                            string itemTag = item.ETag.Split(',').First().Replace("\"", string.Empty);
+                            FileActivity[] editActivity = await Helper.GetActivityAsync(driver.Id, itemTag, ActivityType.Edit);
+                            FileActivity[] accessActivity = await Helper.GetActivityAsync(driver.Id, itemTag, ActivityType.Access);
+
+                            FileActivity[] activities = new FileActivity[editActivity.Length + accessActivity.Length];
+                            editActivity.CopyTo(activities, 0);
+                            accessActivity.CopyTo(activities, editActivity.Length);
+
+                            var it = await Helper.GetItemAsync(driver.Id, itemTag);
+                            await Helper.UpdateActivitiesAsync(it, activities);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+
+                    if (items.NextPageRequest != null)
+                    {
+                        items = await items.NextPageRequest.GetAsync();
+                        @continue = true;
+                    }
+                } while (@continue);
+            }
+
+            _logger.Log(LogLevel.Information, "Update items access Success!");
         }
 
         private void notifyNewRelatorio()
