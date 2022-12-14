@@ -12,6 +12,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
     public class Settings
     {
         private static string settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+        private static string settingsDevelopPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.Development.json");
         public OAuthSettings OAuth { get; set; }
 
         public bool Notifications
@@ -37,7 +38,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
             if (ctx.Database.GetPendingMigrations().Count() > 1)
                 ctx.Database.Migrate();
-            
+
             return ctx;
         }
 
@@ -47,6 +48,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             IConfiguration config = new ConfigurationBuilder()
                 // appsettings.json is required
                 .AddJsonStream(new MemoryStream(File.ReadAllBytes(settingsPath)))
+                .AddJsonFile(settingsDevelopPath, true)
                 .Build();
 
             var settings = config.Get<Settings>();

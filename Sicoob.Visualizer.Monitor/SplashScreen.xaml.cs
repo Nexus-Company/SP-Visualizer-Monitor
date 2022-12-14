@@ -53,7 +53,19 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                 await ChangeStatusAsync("Esperando autorização...");
 
                 await Helper.SaveLoginAsync();
+
+                await Application.Current.Dispatcher
+                    .BeginInvoke(DispatcherPriority.Background, () =>
+                    {
+                        txtHpReOpen.Visibility = Visibility.Visible;
+                    });
             }
+
+            await Application.Current.Dispatcher
+               .BeginInvoke(DispatcherPriority.Background, () =>
+               {
+                   txtHpReOpen.Visibility = Visibility.Hidden;
+               });
 
             await ChangeStatusAsync("Obtendo informações...");
 
@@ -89,12 +101,14 @@ namespace Sicoob.Visualizer.Monitor.Wpf
 
                 Process.Start(psi);
 
+                Thread.Sleep(100);
+
                 service = ServiceController
                     .GetServices()
                     .FirstOrDefault(service => service.DisplayName == monitorServiceName);
             }
 
-            if (service.Status == ServiceControllerStatus.StopPending)
+            if (service?.Status == ServiceControllerStatus.StopPending)
             {
                 await ChangeStatusAsync("Esperando resposta do serviço...");
                 service?.WaitForStatus(ServiceControllerStatus.Stopped);

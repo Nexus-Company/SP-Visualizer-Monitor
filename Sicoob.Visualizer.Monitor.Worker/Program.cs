@@ -5,7 +5,7 @@ using Sicoob.Visualizer.Monitor.Worker;
 using IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {
-        options.ServiceName = ".NET Joke Service";
+        options.ServiceName = "SP Visualizer Worker";
     })
     .ConfigureServices(services =>
     {

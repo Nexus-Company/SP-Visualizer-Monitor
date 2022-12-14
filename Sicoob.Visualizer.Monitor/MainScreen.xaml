@@ -123,7 +123,7 @@
                            HorizontalAlignment="Left" Foreground="#121518"/>
 
                 <!-- Refresh Button -->
-                <Button Style="{StaticResource refreshButton}" Grid.Row="4" Cursor="Hand">
+                <Button Style="{StaticResource refreshButton}" Grid.Row="4" Cursor="Hand" Click="UpdateRecents_Click">
                     <StackPanel Orientation="Horizontal">
                         <Icon:PackIconMaterial Kind="Refresh" VerticalAlignment="Center" Width="11" Height="11" Margin="0 0 10 0"/>
                         <TextBlock Text="Atualizar Acessos"/>

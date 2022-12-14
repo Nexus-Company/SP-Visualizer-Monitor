@@ -35,11 +35,12 @@
                 <ProgressBar Name="progressbar" Value="0" Width="250" Height="5" IsIndeterminate="True"></ProgressBar>
 
                 <TextBlock FontSize="11" FontWeight="ExtraLight" 
-                           HorizontalAlignment="Left" Margin="0 7.5 0 15" Cursor="Hand">
+                           HorizontalAlignment="Left" Margin="0 7.5 0 15" Cursor="Hand"
+                           Visibility="Hidden" Name="txtHpReOpen">
                      <Hyperlink
                          Name="hpReOpen"
                          NavigateUri="http://somesite.example"
-                         RequestNavigate="hpReOpen_RequestNavigate">
+                         RequestNavigate="hpReOpen_RequestNavigate" >
                          Abrir pop-up novamente.
                      </Hyperlink>
                 </TextBlock>

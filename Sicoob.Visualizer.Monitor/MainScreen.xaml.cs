@@ -41,6 +41,8 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                                     .Take(50)
                                     .ToArrayAsync();
 
+            viwers.Items.Clear();
+
             foreach (var item in activities)
                 AddActivityRow(item);
         }
@@ -71,6 +73,8 @@ namespace Sicoob.Visualizer.Monitor.Wpf
             MonitorContext.Dispose();
             Close();
         }
+        private void UpdateRecents_Click(object sender, RoutedEventArgs args)
+            => GetRecents();
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri)

@@ -32,8 +32,13 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
             _userClient = new GraphServiceClient(new DelegateAuthenticationProvider(async (requestMessage) =>
             {
-                if (graphAccessToken.RefreshIn >= DateTime.Now)
-                    await CheckRefreshAsync(AuthenticationType.Graph);
+                if (graphAccessToken.RefreshIn <= DateTime.Now)
+                {
+                    graphAccessToken = await ctx.Authentications.FirstOrDefaultAsync(auth=> auth.Type == AuthenticationType.Graph);
+
+                    if (graphAccessToken.RefreshIn <= DateTime.Now)
+                        await CheckRefreshAsync(AuthenticationType.Graph);
+                }
 
                 requestMessage
                 .Headers
