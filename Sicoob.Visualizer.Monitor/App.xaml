@@ -129,7 +129,7 @@
                 </Setter>
             </Style>
 
-            <Style x:Key="refreshButton" TargetType="Button">
+            <Style x:Key="exportButton" TargetType="Button">
                 <Setter Property="Background" Value="#00723a"/>
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>

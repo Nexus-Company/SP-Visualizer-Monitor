@@ -14,18 +14,18 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         private static string settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
         private static string settingsDevelopPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.Development.json");
         public OAuthSettings OAuth { get; set; }
-
+        public int PerPage { get; set; }
         public bool Notifications
         {
-            get => (bool)JObject.Parse(File.ReadAllText(settingsPath))["Notifications"];
+            get => (bool?)JObject.Parse(File.ReadAllText(settingsPath))[nameof(Notifications)] ?? false;
             set
             {
                 JObject obj = JObject.Parse(File.ReadAllText(settingsPath));
 
-                if ((bool)obj["Notifications"] != value)
+                if ((bool?)obj[nameof(Notifications)] ?? false != value)
                 {
-                    obj.Remove("Notifications");
-                    obj["Notifications"] = value;
+                    obj.Remove(nameof(Notifications));
+                    obj[nameof(Notifications)] = value;
 
                     File.WriteAllText(settingsPath, obj.ToString());
                 }

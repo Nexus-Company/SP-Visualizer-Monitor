@@ -4,10 +4,17 @@ using Newtonsoft.Json;
 using Sicoob.Visualizer.Monitor.Dal;
 using Sicoob.Visualizer.Monitor.Dal.Models;
 using Sicoob.Visualizer.Monitor.Dal.Models.Enums;
-using System.Collections.Generic;
+using System.Timers;
 using System.Net.Http.Headers;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 using ActivityType = Sicoob.Visualizer.Monitor.Dal.Models.Enums.ActivityType;
+using Timer = System.Timers.Timer;
+using System.Net;
+using System.Text.Encodings.Web;
+using Directory = System.IO.Directory;
+using Bytescout.Spreadsheet;
+using System.IO;
+using Workbook = Bytescout.Spreadsheet.Workbook;
 
 namespace Sicoob.Visualizer.Monitor.Comuns
 {
@@ -22,11 +29,35 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         private readonly Authenticator? _authenticator;
         private readonly Random _random;
         private readonly MonitorContext ctx;
+        private static Timer _requestCountClearTimer;
+        private static int _requestCount;
+        private static DateTime _lastRequestAwait;
         private string randomColor => string.Format("#{0:X6}", _random.Next(0x1000000));
-
+        private string directoryResults => Path.GetFullPath("Results");
         public GraphHelper(OAuthSettings settings, MonitorContext ctx, bool listener = false)
         {
             this.ctx = ctx;
+            if (_requestCountClearTimer == null)
+            {
+                _requestCountClearTimer = new Timer(1000 * 60)
+                {
+                    Enabled = true,
+                    AutoReset = true
+                };
+
+                _requestCountClearTimer.Elapsed +=
+                    (object? sender, ElapsedEventArgs args)
+                        =>
+                    {
+                        _requestCount = 0;
+                        _lastRequestAwait = DateTime.Now;
+                    };
+
+                _lastRequestAwait = DateTime.Now;
+
+                _requestCountClearTimer.Start();
+            }
+
             _settings = settings;
             _random = new Random();
 
@@ -34,7 +65,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             {
                 if (graphAccessToken.RefreshIn <= DateTime.Now)
                 {
-                    graphAccessToken = await ctx.Authentications.FirstOrDefaultAsync(auth=> auth.Type == AuthenticationType.Graph);
+                    graphAccessToken = await ctx.Authentications.FirstOrDefaultAsync(auth => auth.Type == AuthenticationType.Graph);
 
                     if (graphAccessToken.RefreshIn <= DateTime.Now)
                         await CheckRefreshAsync(AuthenticationType.Graph);
@@ -53,11 +84,22 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         #region Authentication
         public async Task GetLoginAsync()
         {
-            ctx.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-            graphAccessToken = await ctx.Authentications.FirstAsync();
-            ctx.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
+            try
+            {
+                ctx.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+                graphAccessToken = await ctx.Authentications.FirstAsync();
+                ctx.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
 
-            await CheckRefreshAsync(AuthenticationType.Graph);
+                await CheckRefreshAsync(AuthenticationType.Graph);
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.InnerException;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         private async Task CheckRefreshAsync(AuthenticationType type)
         {
@@ -193,10 +235,16 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         #endregion
 
         public async Task<IGraphServiceDrivesCollectionPage> GetDrivesAsync()
-             => await _userClient.Drives.Request().GetAsync();
+        {
+            NeedAwait();
+            return await _userClient.Drives.Request().GetAsync();
+        }
 
         public async Task<ISiteListsCollectionPage> GetListsAsync(string drive)
-            => await _userClient.Sites[drive].Lists.Request().GetAsync();
+        {
+            NeedAwait();
+            return await _userClient.Sites[drive].Lists.Request().GetAsync();
+        }
 
         public async Task<IListItemsCollectionPage> GetItemsAsync(string site, string list)
         {
@@ -204,20 +252,33 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             request.AppendSegmentToRequestUrl("Name");
             request.AppendSegmentToRequestUrl("DriveItem");
 
+            NeedAwait();
             return await request.Request().GetAsync();
         }
 
-        public async Task<BaseItem> GetItemAsync(string drive, string item)
-            => await _userClient.Drives[drive].Items[item].Request().GetAsync();
+        public async Task<DriveItem> GetItemAsync(string drive, string item)
+        {
+            NeedAwait();
+            return await _userClient.Drives[drive].Items[item].Request().GetAsync();
+        }
 
+        private static int actCount;
         public async Task<FileActivity[]> GetActivityAsync(string drive, string item, ActivityType type)
         {
+            actCount++;
             var url = $"https://graph.microsoft.com/v1.0/drives/{drive}/items/{item.Replace("\"", string.Empty)}/analytics/allTime?%24expand=activities(%24filter%3D{Enum.GetName(type).ToLower()}%20ne%20null)";
             HttpRequestMessage request = new(HttpMethod.Get, url);
             request.Headers.Authorization = new AuthenticationHeaderValue(graphAccessToken.TokenType, graphAccessToken.AccessToken);
 
             HttpClient httpClient = new();
             var response = await httpClient.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                Thread.Sleep((int)response.Headers.RetryAfter.Delta.Value.TotalMilliseconds);
+                actCount = 0;
+                return await GetActivityAsync(drive, item, type);
+            }
 
             string body = await response.Content.ReadAsStringAsync();
 
@@ -233,10 +294,11 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
             return obj.Activities;
         }
-
-        public async Task UpdateActivitiesAsync(BaseItem lItem, FileActivity[] activities)
+        public async Task UpdateActivitiesAsync(string dir, DriveItem lItem, FileActivity[] activities)
         {
             Item item = await ctx.Items.FirstOrDefaultAsync(it => it.Id == lItem.Id);
+            string directory = Uri.UnescapeDataString(lItem.WebUrl.Split("sharepoint.com/")[1]);
+            directory = directory.Substring(dir.Length + 1, (directory.Length - dir.Length - lItem.Name.Length - 1));
 
             if (item == null)
             {
@@ -244,7 +306,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                 {
                     Id = lItem.Id,
                     WebUrl = lItem.WebUrl,
-                    Name = lItem.Name
+                    Name = lItem.Name,
+                    Directory = directory
                 };
 
                 await ctx.Items.AddAsync(item);
@@ -253,8 +316,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             {
                 item.WebUrl = lItem.WebUrl;
                 item.Name = lItem.Name;
-
-                ctx.Entry(item).State = EntityState.Modified;
+                item.Directory = directory;
             }
 
             await ctx.SaveChangesAsync();
@@ -262,9 +324,8 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             foreach (var activity in activities)
             {
                 Activity? act = await (from actv in ctx.Activities
-                                       where actv.Id == activity.Id &&
-                                             actv.Target == lItem.Id &&
-                                             actv.Type == activity.Type && 
+                                       where actv.Target == lItem.Id &&
+                                             actv.Type == activity.Type &&
                                              actv.Date == activity.ActivityDateTime
                                        select actv).FirstOrDefaultAsync();
                 if (act == null)
@@ -272,7 +333,6 @@ namespace Sicoob.Visualizer.Monitor.Comuns
                     act = new()
                     {
                         Date = activity.ActivityDateTime,
-                        Id = activity.Id,
                         User = activity.Actor.User.Id,
                         Type = activity.Type,
                         Target = lItem.Id
@@ -283,6 +343,14 @@ namespace Sicoob.Visualizer.Monitor.Comuns
             }
 
             await ctx.SaveChangesAsync();
+        }
+
+        private static void NeedAwait()
+        {
+            if (_requestCount >= 100)
+                Thread.Sleep((int)((_lastRequestAwait + TimeSpan.FromMilliseconds(1000 * 60)) - DateTime.Now).TotalMilliseconds);
+
+            _requestCount++;
         }
 
         private class ActivitiesResult
@@ -310,6 +378,44 @@ namespace Sicoob.Visualizer.Monitor.Comuns
 
         public async Task<Stream> GetReportsAsync()
             => await _userClient.Reports.GetSharePointActivityFileCounts("D7").Request().GetAsync();
+
+        public async Task<string> ExporteExcel(DateTime start, DateTime end, bool ascending)
+        {
+            if (!Directory.Exists(directoryResults))
+                Directory.CreateDirectory(directoryResults);
+
+            string path = Path.Combine(directoryResults, $"{start}-a-{end}.xlsx");
+
+            Spreadsheet document = new();
+            Workbook book = document.Workbook;
+            Worksheet sheet = book.Worksheets[0];
+
+            var query = (from actv in ctx.Activities
+                         where actv.Date > start &&
+                               actv.Date < end
+                         select actv)
+                         .Include(actv => actv.Item)
+                         .Include(actv => actv.Account)
+                         .OrderByDescending(actv => actv.Date);
+
+            if (ascending)
+                query = query.OrderBy(actv => actv.Date);
+
+            var activities = await query.ToArrayAsync();
+
+            for (int i = 0; i < activities.LongLength; i++)
+            {
+                var row = sheet.Rows[i];
+                var actv = activities[i];
+
+                row[0].Value = actv.Account.Email; 
+                row[2].Value = actv.Account.Email;
+            }
+
+            document.SaveAsXLSX(path);
+
+            return path;
+        }
 
         public void Dispose()
         {

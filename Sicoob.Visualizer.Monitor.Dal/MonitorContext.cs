@@ -42,7 +42,7 @@ public partial class MonitorContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseSqlServer(ConnectionString);
+            optionsBuilder.UseSqlServer(ConnectionString, (opt) => { opt.EnableRetryOnFailure(); });
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -50,7 +50,11 @@ public partial class MonitorContext : DbContext
         base.OnModelCreating(builder);
 
         builder.Entity<Activity>()
-            .HasKey(act => new { act.Id, act.Target, act.Type, act.Date });
+            .HasKey(act => new { act.Target, act.Type, act.Date });
+
+        builder.Entity<Item>()
+            .Property(it => it.Directory)
+            .HasDefaultValue("None");
     }
 
     public override void Dispose()

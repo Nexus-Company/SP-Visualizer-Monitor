@@ -1,4 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
+using Microsoft.Data.SqlClient;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
 using System.Diagnostics;
 using System.ServiceProcess;
@@ -14,7 +16,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class SplashScreen : Window
     {
-        public const string monitorServiceName = "SP Visualizer Worker";
+        public const string monitorServiceName = "SP Visualizer Service";
         private readonly PaletteHelper paletteHelper = new();
         private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
@@ -22,10 +24,22 @@ namespace Sicoob.Visualizer.Monitor.Wpf
         public SplashScreen()
         {
             InitializeComponent();
-            AppSettings = Settings.LoadSettings();
-            thAwaitLogin = new(Login);
-            Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext(), true);
+            try
+            {
+                AppSettings = Settings.LoadSettings();
+                thAwaitLogin = new(Login);
+                Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext(), true);
+            }
+            catch (SqlException ex)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = Path.GetFullPath(@"Conector\Visualizer Conector.exe"),
+                    Verb = "runas"
+                });
 
+                Close();
+            }
             ITheme theme = paletteHelper.GetTheme();
             theme.SetBaseTheme(Theme.Dark);
         }
@@ -82,46 +96,36 @@ namespace Sicoob.Visualizer.Monitor.Wpf
 
             await ChangeStatusAsync("Inciando o serviço...");
 
-            ServiceController? service = ServiceController
-               .GetServices()
-               .FirstOrDefault(service => service.DisplayName == monitorServiceName);
-
-            if (service == null)
+            try
             {
-                var psi = new ProcessStartInfo
+                ServiceController? service = ServiceController
+                                                    .GetServices()
+                                                    .FirstOrDefault(service => service.DisplayName == monitorServiceName);
+
+                if (service?.Status == ServiceControllerStatus.StopPending)
                 {
-                    FileName = "sc",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    Verb = "runas",
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    Arguments = $"create \"{monitorServiceName}\" binPath= \"{Path.GetFullPath(@"Sicoob.Visualizer.Monitor.Worker.exe")}\" start=auto"
-                };
+                    await ChangeStatusAsync("Esperando resposta do serviço...");
+                    service?.WaitForStatus(ServiceControllerStatus.Stopped);
+                    await ChangeStatusAsync("Inciando o serviço...");
+                }
 
-                Process.Start(psi);
+                if (service?.Status != ServiceControllerStatus.Running)
+                {
+                    service?.Start();
+                    service?.WaitForStatus(ServiceControllerStatus.Running);
+                }
 
-                Thread.Sleep(100);
-
-                service = ServiceController
-                    .GetServices()
-                    .FirstOrDefault(service => service.DisplayName == monitorServiceName);
+                service?.Dispose();
             }
-
-            if (service?.Status == ServiceControllerStatus.StopPending)
+            catch (Exception)
             {
-                await ChangeStatusAsync("Esperando resposta do serviço...");
-                service?.WaitForStatus(ServiceControllerStatus.Stopped);
-                await ChangeStatusAsync("Inciando o serviço...");
+                new ToastContentBuilder()
+                        .AddArgument("action", "viewConversation")
+                        .AddArgument("conversationId", 1234)
+                        .AddText("Serviço Monitoramento")
+                        .AddText("O Serviço de Monitoramenteo do Sharepoint foi não iniciado por causa de um erro.")
+                        .Show();
             }
-
-            if (service?.Status != ServiceControllerStatus.Running)
-            {
-                service?.Start();
-                service?.WaitForStatus(ServiceControllerStatus.Running);
-            }
-
-            service?.Dispose();
 
             await Application.Current.Dispatcher
                 .BeginInvoke(DispatcherPriority.Background, () =>
@@ -144,7 +148,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
            => Helper.RequestLogin();
         protected override void OnClosed(EventArgs e)
         {
-            Helper.Dispose();
+            Helper?.Dispose();
         }
     }
 }

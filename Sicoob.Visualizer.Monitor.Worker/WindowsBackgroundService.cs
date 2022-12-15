@@ -19,6 +19,7 @@ namespace Sicoob.Visualizer.Monitor.Worker
         public Settings Settings { get; set; }
         public LastHourly LastUpdateHourly { get; set; }
         public GraphHelper Helper { get; set; }
+        public bool Stopped { get; private set; }
 
         public WindowsBackgroundService(ILogger<WindowsBackgroundService> logger)
         {
@@ -47,7 +48,7 @@ namespace Sicoob.Visualizer.Monitor.Worker
                 _logger.Log(logLevel: LogLevel.Error, exception: ex, null);
             }
 
-            while (true)
+            while (!Stopped)
             {
                 var timeTables = GetSchedules();
 
@@ -79,20 +80,30 @@ namespace Sicoob.Visualizer.Monitor.Worker
                     _logger.Log(LogLevel.Error, ex, null);
                 }
 
-                Thread.Sleep(50000);
+                Thread.Sleep(150000);
             }
+        }
+
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            Stopped = false;
+            return base.StartAsync(cancellationToken);
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            Stopped = true;
+            return base.StopAsync(cancellationToken);
         }
 
         private async Task UpdateUsersAsync()
         {
             var users = await Helper.GetUsersAsync();
 
-            while (users.Count > 1)
+            while (users.NextPageRequest != null)
             {
                 foreach (var user in users)
                     await Helper.UpdateOrAppendUserAsync(user);
-
-                users.Clear();
 
                 if (users.NextPageRequest != null)
                     users = await users.NextPageRequest.GetAsync();
@@ -110,116 +121,62 @@ namespace Sicoob.Visualizer.Monitor.Worker
 
                 foreach (var list in lists)
                 {
-                    List<Task> tasks = new();
+                    if (Stopped)
+                        break;
+
                     var items = await Helper.GetItemsAsync(driverId, list.Id);
 
-                    tasks.Add(new Task((obj) => StartUpdatePage(obj).Wait(), new StartUpdate(items, driver, Settings)));
-
-                    if (tasks[^1].Status == TaskStatus.Created)
-                        tasks[^1].Start();
-
-                    var lastItems = items.NextPageRequest;
-
-                    while (lastItems != null)
+                    bool @continue = false;
+                    do
                     {
-                        var localItems = await lastItems.GetAsync();
-
-                        tasks.Add(new Task((obj) => StartUpdatePage(obj).Wait(), new StartUpdate(localItems, driver, Settings)));
-
-                        if (tasks[^1].Status == TaskStatus.Created)
-                            tasks[^1].Start();
-
-                        lastItems = localItems.NextPageRequest;
-
-                        _logger.Log(LogLevel.Information, $"New Task created with id: {tasks[^1].Id}");
-                    }
-
-                    foreach (var item in tasks)
-                    {
-                        if (item.Status == TaskStatus.Running)
+                        foreach (var item in items)
                         {
-                            _logger.Log(LogLevel.Information, $"Task running with id: {item.Id}");
-                            item.Wait(TimeSpan.FromMinutes(5));
-                            _logger.Log(LogLevel.Information, $"Task finished with id: {item.Id}");
+                            if (item.ContentType.Name == "Folder")
+                                continue;
+
+                            if (Stopped)
+                                break;
+
+                            try
+                            {
+                                string itemTag = item.ETag.Split(',').First().Replace("\"", string.Empty);
+                                var it = await Helper.GetItemAsync(driver.Id, itemTag);
+
+                                if (it.File.MimeType.Contains("image/"))
+                                    continue;
+
+                                Stopwatch stopwatch = new();
+
+                                FileActivity[] editActivity = await Helper.GetActivityAsync(driver.Id, itemTag, ActivityType.Edit);
+                                FileActivity[] accessActivity = await Helper.GetActivityAsync(driver.Id, itemTag, ActivityType.Access);
+
+                                FileActivity[] activities = new FileActivity[editActivity.Length + accessActivity.Length];
+                                editActivity.CopyTo(activities, 0);
+                                accessActivity.CopyTo(activities, editActivity.Length);
+
+                                stopwatch.Stop();
+
+                                _logger.Log(LogLevel.Debug, $"Get activities for item: {item.Id} in {stopwatch.Elapsed}");
+
+                                it.WebUrl = item.WebUrl;
+                                await Helper.UpdateActivitiesAsync(list.Name, it, activities);
+
+                                _logger.Log(LogLevel.Debug, $"Inserted activities for item: {item.Id}");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Log(LogLevel.Error, ex, null);
+                            }
                         }
-                    }
+
+                        @continue = items.NextPageRequest != null;
+
+                        if (@continue)
+                            items = await items.NextPageRequest.GetAsync();
+                    } while (@continue);
                 }
 
                 _logger.Log(LogLevel.Information, "Update items access Success!");
-            }
-            catch (Exception ex)
-            {
-                _logger.Log(LogLevel.Error, ex, null);
-            }
-        }
-        private class StartUpdate
-        {
-            public IListItemsCollectionPage Items { get; set; }
-            public Drive Driver { get; }
-            public GraphHelper Helper { get; set; }
-            public StartUpdate(IListItemsCollectionPage items, Drive driver, Settings settings)
-            {
-                Items = items;
-                Driver = driver;
-                Helper = new(settings.OAuth, settings.GetContext());
-            }
-        }
-
-        private async Task StartUpdatePage(object? obj)
-        {
-            try
-            {
-                var strOpt = obj as StartUpdate;
-
-                await strOpt.Helper.GetLoginAsync();
-
-                lock (strOpt.Items)
-                {
-                    foreach (var item in strOpt.Items)
-                    {
-                        if (item.ContentType.Name == "Folder")
-                            continue;
-
-                        try
-                        {
-                            string itemTag = item.ETag.Split(',').First().Replace("\"", string.Empty);
-
-                            var taskActEdt = strOpt.Helper.GetActivityAsync(strOpt.Driver.Id, itemTag, ActivityType.Edit);
-                            var taskActAcc = strOpt.Helper.GetActivityAsync(strOpt.Driver.Id, itemTag, ActivityType.Access);
-
-                            Stopwatch stopwatch = new();
-                            stopwatch.Start();
-                            taskActAcc.Wait();
-                            taskActEdt.Wait();
-
-                            FileActivity[] editActivity = taskActEdt.Result;
-                            FileActivity[] accessActivity = taskActAcc.Result;
-
-                            FileActivity[] activities = new FileActivity[editActivity.Length + accessActivity.Length];
-                            editActivity.CopyTo(activities, 0);
-                            accessActivity.CopyTo(activities, editActivity.Length);
-
-                            stopwatch.Stop();
-
-                            _logger.Log(LogLevel.Debug, $"Get activities for item: {item.Id} in {stopwatch.Elapsed}");
-                            var taskItem = strOpt.Helper.GetItemAsync(strOpt.Driver.Id, itemTag);
-                            taskItem.Wait();
-
-                            var it = taskItem.Result;
-                            strOpt.Helper.UpdateActivitiesAsync(it, activities).Wait();
-                            _logger.Log(LogLevel.Debug, $"Inserted activities for item: {item.Id}");
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.Log(LogLevel.Error, ex, null);
-                        }
-                        finally
-                        {
-                            Thread.Sleep(2000);
-                        }
-                    }
-                }
-
             }
             catch (Exception ex)
             {

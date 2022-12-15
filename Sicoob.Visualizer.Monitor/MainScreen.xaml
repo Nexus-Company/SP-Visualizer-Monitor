@@ -122,11 +122,11 @@
                 <TextBlock Text="Atividade recente" Grid.Row="1" FontSize="30" FontWeight="SemiBold" Margin="0"
                            HorizontalAlignment="Left" Foreground="#121518"/>
 
-                <!-- Refresh Button -->
-                <Button Style="{StaticResource refreshButton}" Grid.Row="4" Cursor="Hand" Click="UpdateRecents_Click">
+                <!-- Export Button -->
+                <Button Style="{StaticResource exportButton}" Grid.Row="4" Cursor="Hand">
                     <StackPanel Orientation="Horizontal">
-                        <Icon:PackIconMaterial Kind="Refresh" VerticalAlignment="Center" Width="11" Height="11" Margin="0 0 10 0"/>
-                        <TextBlock Text="Atualizar Acessos"/>
+                        <Icon:PackIconMaterial Kind="MicrosoftExcel" VerticalAlignment="Center" Width="15" Height="15" Margin="0 0 15 0"/>
+                        <TextBlock Text="Exporta acessos"/>
                     </StackPanel>
                 </Button>
 
@@ -141,14 +141,14 @@
                 <!-- Members Datagrid-->
                 <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="auto" CanUserResize="False">
+                        <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="50" CanUserResize="False">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Icon:PackIconMaterial Kind="{Binding IconKind}" Width="15" Height="15" Foreground="#6e7783" Margin="0"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Usuário" IsReadOnly="True" Width="auto" CanUserResize="False">
+                        <DataGridTemplateColumn Header="Usuário" IsReadOnly="True" Width="auto" MinWidth="65">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -161,8 +161,8 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto"/>
-                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto" CanUserReorder="True" />
+                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*" Binding="{Binding Directory}"/>
                         <DataGridTemplateColumn Header="Arquivo" IsReadOnly="True" Width="auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -180,28 +180,28 @@
                 </DataGrid>
 
                 <!-- Pagination Section -->
-                <Border Grid.Row="6" HorizontalAlignment="Right" BorderBrush="#dee4ec" BorderThickness="1"
-                        CornerRadius="5" Padding="5" Background="White" Margin="0 10 10 10">
+                <TextBlock Name="txtPages" Grid.Row="6" HorizontalAlignment="Left" Text="10 Páginas" VerticalAlignment="Center" Margin="15 0 0 0" Foreground="#6c7682"/>
+                <Border Grid.Row="6" HorizontalAlignment="Right" BorderBrush="#dee4ec" BorderThickness="1" CornerRadius="5" Padding="5" Background="White" Margin="0 10 10 10">
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource pagingButton}">
+                        <Button Style="{StaticResource pagingButton}" Cursor="Hand" Click="PagePrevious_Click">
                             <Icon:PackIconMaterial Kind="ChevronLeft" Style="{StaticResource pagingButtonIcon}"/>
                         </Button>
 
                         <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
 
-                        <Button Style="{StaticResource pagingButton}" Content="1" Background="#00723a" Foreground="White"/>
-                        <Button Style="{StaticResource pagingButton}" Content="2"/>
-                        <Button Style="{StaticResource pagingButton}" Content="3"/>
+                        <Button Name="pagingOne" Style="{StaticResource pagingButton}" Content="1" Background="#00723a" Foreground="White" Cursor="Hand" Click="Page_Click"/>
+                        <Button Name="pagingTwo" Style="{StaticResource pagingButton}" Content="2" Click="Page_Click"/>
+                        <Button Name="pagingThree" Style="{StaticResource pagingButton}" Content="3" Click="Page_Click"/>
 
-                        <TextBlock Text="..." Foreground="#6c7682" VerticalAlignment="Center" FontSize="15" Margin="10 0"/>
+                        <TextBlock Name="pagingSeparetor" Text="..." Foreground="#6c7682" VerticalAlignment="Center" FontSize="15" Margin="10 0"/>
 
-                        <Button Style="{StaticResource pagingButton}" Content="7"/>
-                        <Button Style="{StaticResource pagingButton}" Content="8"/>
-                        <Button Style="{StaticResource pagingButton}" Content="9"/>
+                        <Button Name="pagingFor"  Style="{StaticResource pagingButton}" Content="4" Click="Page_Click" />
+                        <Button Name="pagingFive"  Style="{StaticResource pagingButton}" Content="5" Click="Page_Click"/>
+                        <Button Name="pagingSix"  Style="{StaticResource pagingButton}" Content="6" Click="Page_Click"/>
 
                         <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
 
-                        <Button Style="{StaticResource pagingButton}">
+                        <Button Style="{StaticResource pagingButton}" Click="PageNext_Click">
                             <Icon:PackIconMaterial Kind="ChevronRight" Style="{StaticResource pagingButtonIcon}"/>
                         </Button>
                     </StackPanel>

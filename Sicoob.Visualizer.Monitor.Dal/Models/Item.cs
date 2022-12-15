@@ -17,4 +17,8 @@ public class Item
     [Required]
     [StringLength(int.MaxValue)]
     public string Name { get; set; }
+
+    [Required]
+    [StringLength(int.MaxValue)]
+    public string Directory { get; set; }
 }
