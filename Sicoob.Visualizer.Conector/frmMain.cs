@@ -29,6 +29,7 @@ namespace Sicoob.Visualizer.Conector
             "EXEC sp_executesql @SqlStatement;" +
             " END" +
             " EXEC master..sp_addsrvrolemember @LoginName, @rolename = N'sysadmin'" +
+            " EXEC master..sp_addsrvrolemember @LoginName, @rolename = N'dbcreator'" +
             "COMMIT";
         private const string checkSysAdminQuery = "SELECT 'true' FROM syslogins WHERE sysadmin = 1 AND loginname = @LoginName;";
         public frmMain()

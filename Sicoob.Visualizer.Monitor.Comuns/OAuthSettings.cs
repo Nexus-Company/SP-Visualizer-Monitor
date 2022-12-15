@@ -36,7 +36,7 @@ namespace Sicoob.Visualizer.Monitor.Comuns
         {
             var ctx = new MonitorContext(_conn);
 
-            if (ctx.Database.GetPendingMigrations().Count() > 1)
+            if (ctx.Database.GetPendingMigrations().Any())
                 ctx.Database.Migrate();
 
             return ctx;

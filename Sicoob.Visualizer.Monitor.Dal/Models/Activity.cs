@@ -10,6 +10,7 @@ namespace Sicoob.Visualizer.Monitor.Dal.Models;
 [Index(nameof(Date))]
 public class Activity
 {
+    public int Id { get; set; }
     public DateTime Date { get; set; }
     [Required]
     public string User { get; set; }

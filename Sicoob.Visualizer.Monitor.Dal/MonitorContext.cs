@@ -50,7 +50,7 @@ public partial class MonitorContext : DbContext
         base.OnModelCreating(builder);
 
         builder.Entity<Activity>()
-            .HasKey(act => new { act.Target, act.Type, act.Date });
+            .HasIndex(act => new { act.Target, act.Type, act.Date });
 
         builder.Entity<Item>()
             .Property(it => it.Directory)
