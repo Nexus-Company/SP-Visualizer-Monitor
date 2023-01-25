@@ -1,6 +1,5 @@
 ﻿using Sicoob.Visualizer.Monitor.Comuns;
 using Sicoob.Visualizer.Monitor.Comuns.Helpers;
-using Sicoob.Visualizer.Monitor.Comuns.Models.Enums;
 using Sicoob.Visualizer.Monitor.Wpf.ViewModels;
 using System.Diagnostics;
 using System.Windows;
@@ -37,6 +36,7 @@ public partial class ExportScreen : Window
 
         try
         {
+            btnExport.Click -= Export_Click;
             string export = await Export.ExportActivitiesAsync(Search,
             dtStart.SelectedDate ?? null,
             dtEnd.SelectedDate ?? DateTime.Now,
@@ -47,13 +47,16 @@ public partial class ExportScreen : Window
             {
                 UseShellExecute = true,
             });
+
+            Close();
         }
         catch (Exception ex)
         {
-
+            MessageBox.Show(ex.Message, "Ocorreu um error!", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        finally {
-            Close();
+        finally
+        {
+            btnExport.Click += Export_Click;
         }
     }
 }

@@ -53,6 +53,6 @@
                 </DatePicker.ToolTip>
             </DatePicker>
         </StackPanel>
-        <Button Content="Exportar" Margin="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="Export_Click"/>
+        <Button Name="btnExport" Content="Exportar" Margin="15" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="Export_Click"/>
     </Grid>
 </Window>

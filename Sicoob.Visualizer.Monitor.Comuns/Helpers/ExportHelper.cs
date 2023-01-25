@@ -121,13 +121,15 @@ public class ExportHelper
                 foreach (var obj in exports)
                 {
                     row = tab.AddRow();
-                    row.Cells[0].AddParagraph(obj.Type);
-                    row.Cells[1].AddParagraph(obj.Date);
-                    row.Cells[3].AddParagraph(obj.Hour);
+                    row.Cells[0].AddParagraph()
+                        .AddFormattedText(obj.Type);
+                    row.Cells[1].AddParagraph().AddFormattedText(obj.Date);
+                    row.Cells[3].AddParagraph().AddFormattedText(obj.Hour);
                     row.Cells[4].AddParagraph()
                         .AddHyperlink(obj.Email, HyperlinkType.Url)
                         .AddFormattedText(obj.User);
-                    row.Cells[5].AddParagraph(obj.Directory);
+                    row.Cells[5].AddParagraph()
+                        .AddFormattedText(obj.Directory);
                     row.Cells[6].AddParagraph(obj.FileName)
                         .AddHyperlink(obj.WebUrl, HyperlinkType.Web)
                         .AddFormattedText(obj.FileName);

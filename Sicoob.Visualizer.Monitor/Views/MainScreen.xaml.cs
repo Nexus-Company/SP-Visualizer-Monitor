@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Media;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
@@ -339,7 +340,18 @@ namespace Sicoob.Visualizer.Monitor.Wpf.Views
             else
                 BellNotifications.Kind = PackIconMaterialKind.BellOff;
         }
+        private void columnHeader_Click(object sender, RoutedEventArgs e)
+        {
+            if (e.OriginalSource is DataGridColumnHeader)
+            {
+                var header = e.OriginalSource as DataGridColumnHeader;
+                if ((header.Content as string).Equals("Data", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    DateAscending = !DateAscending;
+                }
+            }
 
+        }
         protected override void OnClosed(EventArgs e)
         {
             _refreshTime.Stop();

@@ -58,6 +58,8 @@ namespace Sicoob.Visualizer.Monitor.Worker
 
                     _logger.Log(LogLevel.Information, "Update accounts Success!");
 
+                    await UpdateFoldersAsync();
+
                     await UpdateActivitiesAsync();
 
                     if (!CheckHourly(timeTables, out Hourly? actualHourly))
@@ -180,6 +182,11 @@ namespace Sicoob.Visualizer.Monitor.Worker
             {
                 _logger.Log(LogLevel.Error, ex, message: null);
             }
+        }
+
+        private async Task UpdateFoldersAsync()
+        {
+            throw new NotImplementedException();
         }
 
         private void notifyNewRelatorio()

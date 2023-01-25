@@ -142,7 +142,7 @@
                 </StackPanel>
 
                 <!-- Members Datagrid-->
-                <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers">
+                <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers" DataGridColumnHeader.Click="columnHeader_Click">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="50" CanUserResize="False">
                             <DataGridTemplateColumn.CellTemplate>
