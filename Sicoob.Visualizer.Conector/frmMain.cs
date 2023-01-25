@@ -1,6 +1,5 @@
 using Microsoft.Data.Sql;
 using Microsoft.Data.SqlClient;
-using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Diagnostics;
@@ -13,8 +12,13 @@ namespace Sicoob.Visualizer.Conector
         private const string userDefault = "Usuário Padrão";
         private const string userPersonalized = "Usuário Personalizado";
         private const string defaultLogin = "Visualizer Monitor";
-        private const string defaultPass = "S&cur3P@$sw0rd"; 
-        public const string monitorServiceName = "SP Visualizer Service";
+        private const string defaultPass = "S&cur3P@$sw0rd";
+        public const string monitorServiceName =
+#if DEBUG
+            "SP Visualizer Service (Debug)";
+#else 
+            "SP Visualizer Service";
+#endif
         private const string addLoginQuery = "BEGIN TRANSACTION " +
             "DECLARE @LoginName VARCHAR(100);" +
             "DECLARE @LoginPas VARCHAR(500);" +
@@ -134,6 +138,12 @@ namespace Sicoob.Visualizer.Conector
 
                 if (service == null)
                 {
+                    string directory = Path.GetFullPath(
+#if DEBUG
+                     @"..\..\..\..\Sicoob.Visualizer.Monitor.Worker\bin\Debug\net6.0-windows10.0.17763.0\Visualizer.Monitor.Service.exe");
+#else
+                    @"..\Visualizer.Monitor.Service.exe");
+#endif
                     var psi = new ProcessStartInfo
                     {
                         FileName = "sc",
@@ -142,7 +152,7 @@ namespace Sicoob.Visualizer.Conector
                         RedirectStandardError = true,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden,
-                        Arguments = $"create \"{monitorServiceName}\" binPath= \"{Path.GetFullPath(@"..\Visualizer.Monitor.Service.exe")}\" start=auto"
+                        Arguments = $"create \"{monitorServiceName}\" binPath= \"{directory}\" description=\"Serviço de sincronização com o Sharepoint.\" start=auto"
                     };
 
                     Process.Start(psi);

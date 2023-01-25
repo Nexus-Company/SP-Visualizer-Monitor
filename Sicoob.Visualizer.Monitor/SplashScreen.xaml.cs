@@ -2,6 +2,8 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
+using Sicoob.Visualizer.Monitor.Comuns.Helpers;
+using Sicoob.Visualizer.Monitor.Wpf.Views;
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.Windows;
@@ -16,7 +18,12 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class SplashScreen : Window
     {
-        public const string monitorServiceName = "SP Visualizer Service";
+        public const string monitorServiceName =
+#if DEBUG
+     "SP Visualizer Service (Debug)";
+#else 
+            "SP Visualizer Service";
+#endif
         private readonly PaletteHelper paletteHelper = new();
         private readonly Task thAwaitLogin;
         public Settings AppSettings { get; set; }
@@ -123,8 +130,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                         .AddArgument("action", "viewConversation")
                         .AddArgument("conversationId", 1234)
                         .AddText("Serviço Monitoramento")
-                        .AddText("O Serviço de Monitoramenteo do Sharepoint foi não iniciado por causa de um erro.")
-                        .Show();
+                        .AddText("O Serviço de Monitoramenteo do Sharepoint foi não iniciado por causa de um erro.");
             }
 
             await Application.Current.Dispatcher

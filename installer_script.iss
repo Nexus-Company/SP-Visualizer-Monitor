@@ -606,6 +606,7 @@ AllowNoIcons=yes
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64
 SetupIconFile=src\install.ico
+LicenseFile=LICENSE
 
 [Languages]
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
@@ -636,11 +637,11 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Visualizer Conector.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent runascurrentuser
+Filename: "{app}\Conector\Visualizer Conector.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent runascurrentuser
 
 [UninstallRun]
-Filename: {sys}\sc.exe; Parameters: "stop ""SP Visualizer Worker"" " ; Flags: runhidden
-Filename: {sys}\sc.exe; Parameters: "delete ""SP Visualizer Worker"" " ; Flags: runhidden
+Filename: {sys}\sc.exe; Parameters: "stop ""SP Visualizer Service"" " ; Flags: runhidden
+Filename: {sys}\sc.exe; Parameters: "delete ""SP Visualizer Service"" " ; Flags: runhidden
 
 ;[Code]
 ;const

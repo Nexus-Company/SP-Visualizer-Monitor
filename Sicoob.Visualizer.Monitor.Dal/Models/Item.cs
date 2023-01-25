@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sicoob.Visualizer.Monitor.Dal.Models;
+﻿namespace Sicoob.Visualizer.Monitor.Dal.Models;
 
 public class Item
 {
@@ -20,5 +14,11 @@ public class Item
 
     [Required]
     [StringLength(int.MaxValue)]
-    public string Directory { get; set; }
+    public string Directory
+    {
+        get => directory;
+        set => directory = value.EndsWith("/") ? value.Remove(value.Length - 1, 1) : value;
+    }
+
+    private string directory;
 }

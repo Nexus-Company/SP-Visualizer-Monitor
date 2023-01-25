@@ -1,15 +1,12 @@
 using Microsoft.Graph;
 using Microsoft.Toolkit.Uwp.Notifications;
-using Microsoft.VisualBasic;
 using Sicoob.Visualizer.Monitor.Comuns;
-using Sicoob.Visualizer.Monitor.Dal.Models.Enums;
+using Sicoob.Visualizer.Monitor.Comuns.Helpers;
 using System.Data;
 using System.Diagnostics;
-using static Sicoob.Visualizer.Monitor.Comuns.GraphHelper;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 using ActivityType = Sicoob.Visualizer.Monitor.Dal.Models.Enums.ActivityType;
 using DayOfWeek = System.DayOfWeek;
-using TaskStatus = System.Threading.Tasks.TaskStatus;
 
 namespace Sicoob.Visualizer.Monitor.Worker
 {
@@ -40,8 +37,7 @@ namespace Sicoob.Visualizer.Monitor.Worker
                           .AddArgument("action", "viewConversation")
                           .AddArgument("conversationId", 9813)
                           .AddText("Monitoramento")
-                          .AddText("O monitoramenteo do Sharepoint foi iniciado.")
-                          .Show();
+                          .AddText("O monitoramenteo do Sharepoint foi iniciado.");
             }
             catch (Exception ex)
             {
@@ -99,15 +95,17 @@ namespace Sicoob.Visualizer.Monitor.Worker
         private async Task UpdateUsersAsync()
         {
             var users = await Helper.GetUsersAsync();
-
-            while (users.NextPageRequest != null)
+            bool @continue;
+            do
             {
                 foreach (var user in users)
                     await Helper.UpdateOrAppendUserAsync(user);
 
-                if (users.NextPageRequest != null)
+                @continue = users.NextPageRequest != null;
+
+                if (@continue)
                     users = await users.NextPageRequest.GetAsync();
-            }
+            } while (@continue);
         }
 
         private async Task UpdateActivitiesAsync()
@@ -180,7 +178,7 @@ namespace Sicoob.Visualizer.Monitor.Worker
             }
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.Error, ex, null);
+                _logger.Log(LogLevel.Error, ex, message: null);
             }
         }
 
@@ -200,7 +198,7 @@ namespace Sicoob.Visualizer.Monitor.Worker
                             .AddButton(new ToastButton()
                                 .SetContent("Abrir relatório")
                                 .SetProtocolActivation(new Uri("https://localhost:80"))
-                             ).Show();
+                             );
             }
             catch (Exception)
             {
