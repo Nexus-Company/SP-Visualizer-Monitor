@@ -371,51 +371,50 @@ namespace Sicoob.Visualizer.Monitor.Comuns.Helpers
         /// <param name="start">Data de inicio da busca.</param>
         /// <param name="end">Data final da busca.</param>
         /// <returns>Lista de atividades filtradas e ordenadas.</returns>
-        public Activity[] GetActivities(ref int page, bool ascending, out int pages, int perPage = 0, string? fileName = null, string? userName = null, string? userEmail = null, DateTime? start = null, DateTime? end = null)
+        /// 
+        public Activity[] GetActivities(ref int page, bool ascending, out int pages, int perPage = 0, string fileName = null, string userName = null, string userEmail = null, DateTime? start = null, DateTime? end = null)
         {
             var dbCtx = new MonitorContext(connString);
 
-            bool useMail = string.IsNullOrEmpty(userEmail),
-                useName = string.IsNullOrEmpty(userName),
-                flName = string.IsNullOrEmpty(fileName);
-
-#pragma warning disable CS8604 // Possível argumento de referência nula.
-            IQueryable<Activity> activitiesQuery = from act in dbCtx.Activities
-                                                   where (useMail || act.Account.Email.Contains(userEmail)) &&
-                                                         (useName || act.Account.Name.Contains(userName)) &&
-                                                         (flName || act.Item.Name.Contains(fileName))
-                                                   select act;
-#pragma warning restore CS8604 // Possível argumento de referência nula.
-
-            if (perPage > 0)
-            {
-                double pagesDouble = activitiesQuery.Count() / (double)perPage;
-                pages = pagesDouble > (int)pagesDouble ? (int)pagesDouble + 1 : (int)pagesDouble;
-
-                if (page < 1)
-                    page = 1;
-
-                if (page > pages)
-                    page = pages;
-
-                if (pages > 1)
-                    activitiesQuery = activitiesQuery.Skip((int)((page - 1) * (double)perPage))
-                                                       .Take(perPage);
-            }
-            else
-                pages = 1;
+            var activitiesQuery = dbCtx.Activities
+                .Where(act => (string.IsNullOrEmpty(userEmail) || act.Account.Email.Contains(userEmail))
+                    && (string.IsNullOrEmpty(userName) || act.Account.Name.Contains(userName))
+                    && (string.IsNullOrEmpty(fileName) || act.Item.Name.Contains(fileName)));
 
             if (ascending)
                 activitiesQuery = activitiesQuery.OrderBy(act => act.Date);
             else
                 activitiesQuery = activitiesQuery.OrderByDescending(act => act.Date);
 
+            if (start.HasValue)
+                activitiesQuery = activitiesQuery.Where(act => act.Date >= start);
+
+            if (end.HasValue)
+                activitiesQuery = activitiesQuery.Where(act => act.Date <= end);
+
+            pages = (int)Math.Ceiling(activitiesQuery.Count() / (double)perPage);
+
+            if (page < 1)
+                page = 1;
+
+            if (page > pages)
+                page = pages;
+
+            if (perPage > 0)
+                activitiesQuery = activitiesQuery
+                    .Skip((page - 1) * perPage)
+                    .Take(perPage);
+
             try
             {
-                var activities = activitiesQuery
-                                    .Include(act => act.Account)
-                                    .Include(act => act.Item)
-                                    .ToArray();
+                var queryObj = activitiesQuery
+                    .Include(act => act.Account)
+                    .Include(act => act.Item);
+
+                string query = queryObj.ToQueryString();
+
+                var activities = queryObj
+                    .ToArray();
 
                 return activities;
             }
@@ -424,7 +423,6 @@ namespace Sicoob.Visualizer.Monitor.Comuns.Helpers
                 throw ex;
             }
         }
-
         public void ClearLogin()
         {
             _ = ctx.Database.ExecuteSqlRaw("TRUNCATE TABLE [Authentications]");

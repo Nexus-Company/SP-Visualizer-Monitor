@@ -1,11 +1,10 @@
 ﻿using CsvHelper;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
 using OfficeOpenXml;
 using Sicoob.Visualizer.Monitor.Comuns.Models;
 using Sicoob.Visualizer.Monitor.Comuns.Models.Enums;
 using System.Text;
-using MigraDoc.DocumentObjectModel;
-using MigraDoc.Rendering;
-using System.ComponentModel;
 
 namespace Sicoob.Visualizer.Monitor.Comuns.Helpers;
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.Graph.SecurityNamespace;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Sicoob.Visualizer.Monitor.Comuns;
 public static class Helper

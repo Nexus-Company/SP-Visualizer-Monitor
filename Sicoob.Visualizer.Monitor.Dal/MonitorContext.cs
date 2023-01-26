@@ -25,7 +25,7 @@ public partial class MonitorContext : DbContext
     {
         ConnectionString = _lastConnection ??
 #if DEBUG
-            "Server=PC;Database=Nexus OAuth (Development);Trusted_Connection=true;";
+            "Server=PC;User=MWS;Password=dev;TrustServerCertificate=True;Database=Visualizer Monitor;";
 #else   
             "Server=PC;Database=Nexus OAuth;User Id=MWS;Password=dev;";
 #endif

@@ -1,5 +1,6 @@
 ﻿namespace Sicoob.Visualizer.Monitor.Dal.Models;
 
+[Index(nameof(Id), nameof(Name))]
 public class Item
 {
     [Key]
@@ -9,7 +10,7 @@ public class Item
     [StringLength(int.MaxValue)]
     public string WebUrl { get; set; }
     [Required]
-    [StringLength(int.MaxValue)]
+    [StringLength(449)]
     public string Name { get; set; }
 
     [Required]

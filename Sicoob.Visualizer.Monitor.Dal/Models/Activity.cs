@@ -5,7 +5,7 @@ namespace Sicoob.Visualizer.Monitor.Dal.Models;
 /// <summary>
 /// 
 /// </summary>
-[Index(nameof(Date))]
+[Index(nameof(Target), nameof(User), nameof(Date))]
 public class Activity
 {
     public int Id { get; set; }
@@ -13,6 +13,7 @@ public class Activity
     public DateTime Date { get; set; }
 
     [Required]
+    [StringLength(449)]
     public string User { get; set; }
 
     [Required]

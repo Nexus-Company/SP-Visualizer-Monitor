@@ -1,6 +1,8 @@
 ﻿using System.Runtime.Serialization;
 
 namespace Sicoob.Visualizer.Monitor.Dal.Models;
+
+[Index(nameof(Id), nameof(Name))]
 public class Account
 {
     [Key]
@@ -9,7 +11,8 @@ public class Account
 
     [StringLength(320)]
     public string Email { get; set; }
-    [StringLength(320)]
+
+    [StringLength(449)]
     public string Name { get; set; }
 
     [StringLength(12)]

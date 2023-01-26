@@ -18,6 +18,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class SplashScreen : Window
     {
+        public const string version = "1.0.2";
         public const string monitorServiceName =
 #if DEBUG
      "SP Visualizer Service (Debug)";
@@ -31,6 +32,8 @@ namespace Sicoob.Visualizer.Monitor.Wpf
         public SplashScreen()
         {
             InitializeComponent();
+
+            txtVersion.Text = $"Versão: {version}";
             try
             {
                 AppSettings = Settings.LoadSettings();
@@ -41,7 +44,13 @@ namespace Sicoob.Visualizer.Monitor.Wpf
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = Path.GetFullPath(@"Conector\Visualizer Conector.exe"),
+                    FileName = Path.GetFullPath(
+#if DEBUG
+                        @"..\..\..\..\Sicoob.Visualizer.Conector\bin\Debug\net6.0-windows10.0.17763.0\Visualizer Conector.exe"
+#else
+                        @"Conector\Visualizer Conector.exe"
+#endif
+),
                     Verb = "runas"
                 });
 
