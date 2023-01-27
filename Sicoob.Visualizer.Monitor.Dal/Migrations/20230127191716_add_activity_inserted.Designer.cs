@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sicoob.Visualizer.Monitor.Dal;
 
@@ -11,9 +12,11 @@ using Sicoob.Visualizer.Monitor.Dal;
 namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 {
     [DbContext(typeof(MonitorContext))]
-    partial class MonitorContextModelSnapshot : ModelSnapshot
+    [Migration("20230127191716_add_activity_inserted")]
+    partial class addactivityinserted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,9 +40,6 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .IsRequired()
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
-
-                    b.Property<DateTime>("LastCheck")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -173,8 +173,8 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .HasColumnType("nvarchar(449)");
 
                     b.Property<string>("FolderId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
 
                     b.Property<string>("ListId")
                         .HasMaxLength(449)
@@ -212,10 +212,6 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .HasMaxLength(449)
                         .HasColumnType("nvarchar(449)");
 
-                    b.Property<string>("Directory")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("DriveId")
                         .HasColumnType("nvarchar(max)");
 
@@ -227,10 +223,6 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .IsRequired()
                         .HasMaxLength(449)
                         .HasColumnType("nvarchar(449)");
-
-                    b.Property<string>("WebUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

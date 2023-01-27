@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.IconPacks;
+using Microsoft.EntityFrameworkCore;
 using Sicoob.Visualizer.Monitor.Comuns;
 using Sicoob.Visualizer.Monitor.Comuns.Helpers;
 using Sicoob.Visualizer.Monitor.Dal.Models;
@@ -21,11 +22,13 @@ namespace Sicoob.Visualizer.Monitor.Wpf.Views;
 public partial class MainScreen : Window
 {
     private Timer _refreshTime;
+    private Timer _updateLastCheck;
     public Settings AppSettings { get; set; }
     public Account Account { get; set; }
-    public bool DateAscending { get; set; }
+    public bool? DateAscending { get; set; } = null;
     public int TotalPages { get; set; }
-    public DateTime LastCheck { get; set; }
+    public bool Active { get; set; } = true;
+    public DateTime LastCheck { get => Account.LastCheck; }
     public int Page { get => _page; set => _page = value; }
 
     private int _page;
@@ -35,11 +38,11 @@ public partial class MainScreen : Window
     {
         InitializeComponent();
         SetAccount(account);
-        LastCheck = new DateTime(2022, 12, 13);
         AppSettings = Settings.LoadSettings();
         Page = 1;
-        DateAscending = false;
         Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext());
+
+        #region Timers
         _refreshTime = new()
         {
             AutoReset = true,
@@ -48,6 +51,16 @@ public partial class MainScreen : Window
         };
         _refreshTime.Elapsed += Refresh;
         _refreshTime.Start();
+
+        _updateLastCheck = new()
+        {
+            AutoReset = true,
+            Interval = 30000,
+            Enabled = true
+        };
+        _updateLastCheck.Elapsed += UpdateLastCheck;
+        _updateLastCheck.Start();
+        #endregion
         UpdateBell();
     }
 
@@ -59,7 +72,7 @@ public partial class MainScreen : Window
             var header = e.OriginalSource as DataGridColumnHeader;
             if ((header.Content as string).Equals("Data", StringComparison.InvariantCultureIgnoreCase))
             {
-                DateAscending = !DateAscending;
+                DateAscending = !(DateAscending ?? true);
             }
         }
     }
@@ -155,7 +168,7 @@ public partial class MainScreen : Window
 
         (userName, userEmail, fileName) = search.GetSearch();
 
-        var activities = Helper.GetActivities(ref page, DateAscending, out int pages, AppSettings.PerPage, fileName, userName, userEmail, start, end);
+        var activities = Helper.GetActivities(ref page, out int pages, AppSettings.PerPage, DateAscending, fileName, userName, userEmail, start, end);
 
         if (activities.Where(wh => wh.Date > LastCheck).Count() > 0)
         {
@@ -176,6 +189,21 @@ public partial class MainScreen : Window
         GetRecents(ref _page, Search);
     }
 
+    private async void UpdateLastCheck(object sender, EventArgs args)
+    {
+        if (Active)
+        {
+            Account.LastCheck = DateTime.Now;
+            var settings = Settings.LoadSettings();
+
+            using (var ctx = settings.GetContext())
+            {
+                ctx.Entry(Account).State = EntityState.Modified;
+                await ctx.SaveChangesAsync();
+            }
+        }
+    }
+
     private void AddActivityRow(Activity[] acts)
     {
         Application.Current.Dispatcher.BeginInvoke(() =>
@@ -187,6 +215,8 @@ public partial class MainScreen : Window
             {
                 Activity act = acts[i];
                 string[] names = act.Account.Name.Split(' ');
+                string Directory = act.Item.Folder?.Directory ?? act.Item.List?.Directory;
+                Directory ??= string.Empty;
                 object obj = new
                 {
                     BgColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(act.Account.Color)),
@@ -195,7 +225,7 @@ public partial class MainScreen : Window
                     DisplayName = act.Account.Name,
                     ItemName = act.Item.Name,
                     ItemWebUrl = act.Item.WebUrl,
-                    act.Item.Directory,
+                    Directory,
                     act.Date,
                     act.Account.Email,
                     IconNew = (act.Date > LastCheck) ? Visibility.Visible : Visibility.Hidden
@@ -349,7 +379,7 @@ public partial class MainScreen : Window
         userInitial.Text = names[0][0].ToString().ToUpperInvariant();
         userColor.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(account.Color));
     }
-    private PackIconMaterialKind KindByActivityType(ActivityType type)
+    private static PackIconMaterialKind KindByActivityType(ActivityType type)
         => type switch
         {
             ActivityType.Access => PackIconMaterialKind.Eye,

@@ -149,7 +149,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto" CanUserReorder="True" />
-                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*" Binding="{Binding Directory}"/>
+                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*" Binding="{Binding Directory}" CanUserReorder="False"/>
                         <DataGridTemplateColumn Header="Arquivo" IsReadOnly="True" Width="auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

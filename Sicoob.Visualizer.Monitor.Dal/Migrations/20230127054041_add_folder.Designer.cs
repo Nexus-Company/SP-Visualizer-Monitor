@@ -12,8 +12,8 @@ using Sicoob.Visualizer.Monitor.Dal;
 namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 {
     [DbContext(typeof(MonitorContext))]
-    [Migration("20230110224845_alter_column_length")]
-    partial class altercolumnlength
+    [Migration("20230127054041_add_folder")]
+    partial class addfolder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,10 +43,12 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(320)
-                        .HasColumnType("nvarchar(320)");
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Id", "Name");
 
                     b.ToTable("Accounts");
                 });
@@ -71,17 +73,46 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 
                     b.Property<string>("User")
                         .IsRequired()
+                        .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Date");
-
                     b.HasIndex("User");
 
-                    b.HasIndex("Target", "Type", "Date");
+                    b.HasIndex("Target", "User", "Date");
 
                     b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.Folder", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Directory")
+                        .IsRequired()
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FatherId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ListId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(449)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FatherId");
+
+                    b.HasIndex("ListId");
+
+                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.GraphAuthentication", b =>
@@ -130,17 +161,16 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
 
-                    b.Property<string>("Directory")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("None");
+                    b.Property<string>("FolderId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ListId")
+                        .HasColumnType("nvarchar(449)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
 
                     b.Property<string>("WebUrl")
                         .IsRequired()
@@ -149,7 +179,54 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FolderId");
+
+                    b.HasIndex("ListId");
+
+                    b.HasIndex("Id", "Name");
+
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.List", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SiteId")
+                        .IsRequired()
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SiteId");
+
+                    b.ToTable("Lists");
+                });
+
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.Site", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(449)
+                        .HasColumnType("nvarchar(449)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sites");
                 });
 
             modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.Activity", b =>
@@ -171,6 +248,23 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.Folder", b =>
+                {
+                    b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.Folder", "Father")
+                        .WithMany()
+                        .HasForeignKey("FatherId");
+
+                    b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.List", "List")
+                        .WithMany()
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Father");
+
+                    b.Navigation("List");
+                });
+
             modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.GraphAuthentication", b =>
                 {
                     b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.Account", "AccountNavigation")
@@ -180,6 +274,32 @@ namespace Sicoob.Visualizer.Monitor.Dal.Migrations
                         .IsRequired();
 
                     b.Navigation("AccountNavigation");
+                });
+
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.Item", b =>
+                {
+                    b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.Folder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId");
+
+                    b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.List", "List")
+                        .WithMany()
+                        .HasForeignKey("ListId");
+
+                    b.Navigation("Folder");
+
+                    b.Navigation("List");
+                });
+
+            modelBuilder.Entity("Sicoob.Visualizer.Monitor.Dal.Models.List", b =>
+                {
+                    b.HasOne("Sicoob.Visualizer.Monitor.Dal.Models.Site", "Site")
+                        .WithMany()
+                        .HasForeignKey("SiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Site");
                 });
 #pragma warning restore 612, 618
         }

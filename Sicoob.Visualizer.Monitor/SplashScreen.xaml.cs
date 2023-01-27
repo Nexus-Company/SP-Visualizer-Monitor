@@ -46,7 +46,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
                 {
                     FileName = Path.GetFullPath(
 #if DEBUG
-                        @"..\..\..\..\Sicoob.Visualizer.Conector\bin\Debug\net6.0-windows10.0.17763.0\Visualizer Conector.exe"
+                        @"..\..\..\..\Sicoob.Visualizer.Conector\bin\Debug\net7.0-windows\Visualizer Conector.exe"
 #else
                         @"Conector\Visualizer Conector.exe"
 #endif

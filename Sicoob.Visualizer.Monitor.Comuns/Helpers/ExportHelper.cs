@@ -36,7 +36,7 @@ public class ExportHelper
         (userName, userEmail, fileName) = search.GetSearch();
         int page = 1;
 
-        ExportActivity[] exports = ExportActivity.Convert(Graph.GetActivities(ref page, ascending, out _, fileName: fileName, userName: userName, userEmail: userEmail, start: start, end: end));
+        ExportActivity[] exports = ExportActivity.Convert(Graph.GetActivities(ref page, out _, ascending: ascending, fileName: fileName, userName: userName, userEmail: userEmail, start: start, end: end));
 
         switch (format)
         {

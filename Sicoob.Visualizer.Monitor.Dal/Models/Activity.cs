@@ -13,7 +13,7 @@ public class Activity
     public DateTime Date { get; set; }
 
     [Required]
-    [StringLength(449)]
+    [StringLength(320)]
     public string User { get; set; }
 
     [Required]
@@ -21,6 +21,9 @@ public class Activity
 
     [Required]
     public ActivityType Type { get; set; }
+
+    [Required]
+    public DateTime Inserted { get; set; }
 
     [ForeignKey(nameof(User))]
     public Account Account { get; set; }

@@ -90,7 +90,7 @@ namespace Sicoob.Visualizer.Conector
             bool defaultConnection = cbAuthMode.SelectedItem as string == userDefault;
             string sttgPath = Path.GetFullPath(
 #if DEBUG
-                     @"..\..\..\..\Sicoob.Visualizer.Monitor\bin\Debug\net6.0-windows10.0.17763.0\appsettings.json");
+                     @"..\..\..\..\Sicoob.Visualizer.Monitor\bin\Debug\net7.0-windows\appsettings.json");
 #else
                     @"..\appsettings.json");
 #endif
@@ -140,7 +140,7 @@ namespace Sicoob.Visualizer.Conector
                 {
                     string directory = Path.GetFullPath(
 #if DEBUG
-                     @"..\..\..\..\Sicoob.Visualizer.Monitor.Worker\bin\Debug\net6.0-windows10.0.17763.0\Visualizer.Monitor.Service.exe");
+                     @"..\..\..\..\Sicoob.Visualizer.Monitor\bin\Debug\net7.0-windows\Visualizer.Monitor.Service.exe");
 #else
                     @"..\Visualizer.Monitor.Service.exe");
 #endif
@@ -152,7 +152,7 @@ namespace Sicoob.Visualizer.Conector
                         RedirectStandardError = true,
                         Verb = "runas",
                         WindowStyle = ProcessWindowStyle.Hidden,
-                        Arguments = $"create \"{monitorServiceName}\" binPath= \"{directory}\" description=\"Serviço de sincronização com o Sharepoint.\" start=auto"
+                        Arguments = $"create \"{monitorServiceName}\" binPath= \"{directory}\" start=auto"
                     };
 
                     Process.Start(psi);
@@ -161,7 +161,7 @@ namespace Sicoob.Visualizer.Conector
                 Process.Start(new ProcessStartInfo
                 {
 #if DEBUG
-                    FileName = Path.GetFullPath(@"..\..\..\..\Sicoob.Visualizer.Monitor\bin\Debug\net6.0-windows10.0.17763.0\Visualizer Monitor.exe"),
+                    FileName = Path.GetFullPath(@"..\..\..\..\Sicoob.Visualizer.Monitor\bin\Debug\net7.0-windows\Visualizer Monitor.exe"),
 #else
                     FileName = Path.GetFullPath(@"..\Visualizer Monitor.exe"),
 #endif

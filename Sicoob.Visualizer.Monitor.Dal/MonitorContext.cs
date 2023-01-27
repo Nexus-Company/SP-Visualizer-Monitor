@@ -13,6 +13,9 @@ public partial class MonitorContext : DbContext
     public virtual DbSet<GraphAuthentication> Authentications { get; set; }
     public virtual DbSet<Activity> Activities { get; set; }
     public virtual DbSet<Item> Items { get; set; }
+    public virtual DbSet<Site> Sites { get; set; }
+    public virtual DbSet<List> Lists { get; set; }
+    public virtual DbSet<Folder> Folders { get; set; }
     #endregion
 
     /// <summary>
@@ -43,18 +46,6 @@ public partial class MonitorContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
             optionsBuilder.UseSqlServer(ConnectionString, (opt) => { opt.EnableRetryOnFailure(); });
-    }
-
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-
-        builder.Entity<Activity>()
-            .HasIndex(act => new { act.Target, act.Type, act.Date });
-
-        builder.Entity<Item>()
-            .Property(it => it.Directory)
-            .HasDefaultValue("None");
     }
 
     public override void Dispose()
