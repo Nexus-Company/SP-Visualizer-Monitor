@@ -6,11 +6,13 @@ using Sicoob.Visualizer.Monitor.Dal.Models;
 using Sicoob.Visualizer.Monitor.Dal.Models.Enums;
 using System.Diagnostics;
 using System.Media;
+using System.ServiceProcess;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using Activity = Sicoob.Visualizer.Monitor.Dal.Models.Activity;
 using Timer = System.Timers.Timer;
@@ -40,8 +42,9 @@ public partial class MainScreen : Window
         SetAccount(account);
         AppSettings = Settings.LoadSettings();
         Page = 1;
-        Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext());
+        txtVersion.Text = $"Versão: {SplashScreen.version}";
 
+        Helper = new GraphHelper(AppSettings.OAuth, AppSettings.GetContext());
         #region Timers
         _refreshTime = new()
         {
@@ -109,6 +112,32 @@ public partial class MainScreen : Window
 
     private void Conffett_Click(object sender, EventArgs args)
     {
+    }
+
+    private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        DragMove();
+    }
+    private void Window_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton == MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void btnMaximize_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            WindowState = WindowState.Normal;
+            btnMaximize.Kind = PackIconMaterialKind.Fullscreen;
+        }
+        else
+        {
+            WindowState = WindowState.Maximized;
+            btnMaximize.Kind = PackIconMaterialKind.FullscreenExit;
+        }
     }
     #endregion
 
@@ -182,11 +211,15 @@ public partial class MainScreen : Window
         Application.Current.Dispatcher.Invoke(()
             => HiddenByPageNumber());
     }
-    private void UpdateRecents_Click(object sender, RoutedEventArgs args)
-            => GetRecents(ref _page, Search);
     private void Refresh(object sender, EventArgs args)
     {
         GetRecents(ref _page, Search);
+        ServiceController? service = ServiceController
+                                           .GetServices()
+                                           .FirstOrDefault(service => service.DisplayName == SplashScreen.monitorServiceName);
+
+        Application.Current.Dispatcher.BeginInvoke(() =>
+            txtServiceStatus.Text = $"Service: {Enum.GetName(service?.Status ?? ServiceControllerStatus.Stopped)}");
     }
 
     private async void UpdateLastCheck(object sender, EventArgs args)
@@ -228,7 +261,7 @@ public partial class MainScreen : Window
                     Directory,
                     act.Date,
                     act.Account.Email,
-                    IconNew = (act.Date > LastCheck) ? Visibility.Visible : Visibility.Hidden
+                    IconNew = (act.Inserted > LastCheck) ? Visibility.Visible : Visibility.Hidden
                 };
 
                 if (viwers.Items.Count < i + 1)
@@ -393,7 +426,6 @@ public partial class MainScreen : Window
         else
             BellNotifications.Kind = PackIconMaterialKind.BellOff;
     }
-
     protected override void OnClosed(EventArgs e)
     {
         _refreshTime.Stop();

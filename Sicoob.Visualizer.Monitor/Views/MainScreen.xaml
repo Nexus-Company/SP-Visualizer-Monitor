@@ -3,217 +3,232 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks" 
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="av" 
-    x:Class="Sicoob.Visualizer.Monitor.Wpf.Views.MainScreen" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="av" 
+        x:Class="Sicoob.Visualizer.Monitor.Wpf.Views.MainScreen" 
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Title="Esperando Login" Height="620" Width="930"
+        Title="Monitor de Visualizações" Height="620" Width="930"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseMove="Window_MouseMove"
         Background="{x:Null}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
-    <Border Background="#fafafa" CornerRadius="30" >
+    <Border Background="#fafafa" CornerRadius="25" >
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Left Menu -->
-            <Grid>
+            <Grid VerticalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Row="1" Background="#00723a" CornerRadius="29 0 0 29" MaxWidth="200">
-                    <DockPanel>
-                        <!-- Menu Logo -->
-                        <Border Name="userColor" Padding="3" Background="#AADDEE" CornerRadius="100"
-                                DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 20 0 0">
-                            <TextBlock Name="userInitial" Text="J" Width="110"  TextAlignment="Center" FontSize="80" FontWeight="SemiBold"/>
-                        </Border>
+                <!-- Left Menu -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Menu Titles -->
-                        <TextBlock Name="userName" Text="Juan Doug..." Foreground="White" FontSize="25" FontWeight="SemiBold" MaxWidth="200"
+                    <Border Grid.Row="1" Background="#182538" CornerRadius="24 0 0 24" MaxWidth="200">
+                        <DockPanel>
+                            <!-- Menu Logo -->
+                            <Border Name="userColor" Padding="3" Background="#AADDEE" CornerRadius="100"
+                                DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="0 20 0 0">
+                                <TextBlock Name="userInitial" Text="J" Width="110"  TextAlignment="Center" FontSize="80" FontWeight="SemiBold"/>
+                            </Border>
+
+                            <!-- Menu Titles -->
+                            <TextBlock Name="userName" Text="Juan Doug..." Foreground="White" FontSize="25" FontWeight="SemiBold" MaxWidth="200"
                                    DockPanel.Dock="Top" TextAlignment="Center" Margin="35 25 35 10"/>
-                        <TextBlock Name="userEmail" Text="juandouglas204@gmail.com" Foreground="#c0ccc4" FontSize="12" FontWeight="SemiBold" 
+                            <TextBlock Name="userEmail" Text="juandouglas2004@gmail.com" Foreground="#c0ccc4" FontSize="12" FontWeight="SemiBold" 
                                    DockPanel.Dock="Top" TextAlignment="Center"/>
 
-                        <!-- Menu Seperator-->
-                        <Separator Margin="25" DockPanel.Dock="Top" Height="2" Background="#003d1f"/>
+                            <!-- Menu Seperator-->
+                            <Separator Margin="25" DockPanel.Dock="Top" Height="2" Background="#374861"/>
 
-                        <!-- Menu Buttons -->
-                        <StackPanel DockPanel.Dock="Top">
-                            <Button Style="{StaticResource menuButton}">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <Icon:PackIconMaterial Kind="Lightbulb" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Recentes"/>
-                                </StackPanel>
-                            </Button>
+                            <!-- Menu Buttons -->
+                            <StackPanel DockPanel.Dock="Top">
+                                <Button Style="{StaticResource menuButton}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Icon:PackIconMaterial Kind="Lightbulb" Style="{StaticResource menuButtonIcon}"/>
+                                        <TextBlock Text="Recentes"/>
+                                    </StackPanel>
+                                </Button>
 
-                            <Button Style="{StaticResource menuButton}" Cursor="No">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <Icon:PackIconMaterial Kind="Calendar" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Agendamentos"/>
-                                </StackPanel>
-                            </Button>
+                                <Button Style="{StaticResource menuButton}" Cursor="No">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Icon:PackIconMaterial Kind="Calendar" Style="{StaticResource menuButtonIcon}"/>
+                                        <TextBlock Text="Agendamentos"/>
+                                    </StackPanel>
+                                </Button>
 
-                            <Button Style="{StaticResource menuButton}" Cursor="No">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <Icon:PackIconMaterial Kind="AccountMultipleOutline" Style="{StaticResource menuButtonIcon}"/>
-                                    <TextBlock Text="Usuários"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-
-                        <Button Style="{StaticResource menuButton}" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Margin="15 0 15 20" Click="Logout_Click" Cursor="Hand">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Icon:PackIconMaterial Kind="Logout" Style="{StaticResource menuButtonIcon}"/>
-                                <TextBlock Text="Logout"/>
+                                <Button Style="{StaticResource menuButton}" Cursor="No">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Icon:PackIconMaterial Kind="AccountMultipleOutline" Style="{StaticResource menuButtonIcon}"/>
+                                        <TextBlock Text="Usuários"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
-                        </Button>
-                    </DockPanel>
-                </Border>
-            </Grid>
 
-            <!-- Menu Icon -->
-            <!--
-            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20 28 0 35" Style="{StaticResource topButton}" Cursor="Hand">
+                            <Button Style="{StaticResource menuButton}" VerticalAlignment="Bottom" DockPanel.Dock="Bottom" Margin="15 0 15 20" Click="Logout_Click" Cursor="Hand">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Icon:PackIconMaterial Kind="Logout" Style="{StaticResource menuButtonIcon}"/>
+                                    <TextBlock Text="Logout"/>
+                                </StackPanel>
+                            </Button>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Menu Icon -->
+
+                <!--<Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20 28 0 35" Style="{StaticResource topButton}" Cursor="Hand">
                 <Icon:PackIconMaterial Kind="Menu" Width="15" Height="15"/>
             </Button>-->
 
-            <Grid Grid.Column="1" Margin="30 20 20 20">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                
-                <Button Style="{StaticResource exitButton}" HorizontalAlignment="Right" Click="Exit_Click" Cursor="Hand">
-                    <Icon:PackIconMaterial Kind="Close" Width="20" Height="20"/>
-                </Button>
+                <Grid Grid.Column="1" Margin="15">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
 
-                <Button Style="{StaticResource topButton}" Margin="0 0 70 0" Background="#dcdcdc" HorizontalAlignment="Right" Click="Conffett_Click">
-                    <Icon:PackIconMaterial Kind="Cog"/>
-                </Button>
+                    <Button Style="{StaticResource exitButton}" HorizontalAlignment="Right" Click="Exit_Click" Cursor="Hand">
+                        <Icon:PackIconMaterial Kind="Close" Width="20" Height="20"/>
+                    </Button>
 
-                <Button Style="{StaticResource topButton}" Click="Notifications_Change" Margin="0 0 110 0" Background="#dcdcdc" HorizontalAlignment="Right" Cursor="Hand">
-                    <Icon:PackIconMaterial Kind="Bell" x:Name="BellNotifications"/>
-                </Button>
+                    <Button Style="{StaticResource topButton}" Margin="0 0 60 0" Background="#dcdcdc" HorizontalAlignment="Right" Click="Conffett_Click">
+                        <Icon:PackIconMaterial Kind="Cog"/>
+                    </Button>
 
-                <!-- Page title -->
-                <TextBlock Text="Atividade recente" Grid.Row="1" FontSize="30" FontWeight="SemiBold" Margin="0"
+                    <Button Style="{StaticResource topButton}" Click="Notifications_Change" Margin="0 0 95 0" Background="#dcdcdc" HorizontalAlignment="Right" Cursor="Hand">
+                        <Icon:PackIconMaterial Kind="Bell" x:Name="BellNotifications"/>
+                    </Button>
+
+                    <Button Style="{StaticResource topButton}" Click="btnMaximize_Click" Margin="0 0 130 0" Background="#dcdcdc" HorizontalAlignment="Right" Cursor="Hand">
+                        <Icon:PackIconMaterial Kind="Fullscreen" x:Name="btnMaximize"/>
+                    </Button>
+
+                    <!-- Page title -->
+                    <TextBlock Text="Atividade recente" Grid.Row="1" FontSize="30" FontWeight="SemiBold" Margin="0"
                            HorizontalAlignment="Left" Foreground="#121518"/>
-                
-                <!-- Separator -->
-                <Separator Height="1" Grid.Row="3" Background="#dae2ea" Margin="0 10 0 10"/>
 
-                <!-- Tab Buttons -->
-                <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
-                    <Button Content="Acessos" Style="{StaticResource tabButton}" BorderBrush="#00be60"/>
-                </StackPanel>
+                    <!-- Separator -->
+                    <Separator Height="1" Grid.Row="3" Background="#dae2ea" Margin="0 10 0 10"/>
 
-                <!-- Members Datagrid-->
-                <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers" DataGridColumnHeader.Click="columnHeader_Click">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="50" CanUserResize="False">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="-10 5 -20 0 ">
-                                        <Icon:PackIconMaterial Kind="Clock" Width="15" Height="15" Foreground="#00723a" Margin="0" Visibility="{Binding IconNew}"/>
-                                        <Icon:PackIconMaterial Kind="{Binding IconKind}" Width="17" Height="17" Foreground="#6e7783" Margin="15 0 0 0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Usuário" IsReadOnly="True" Width="auto" MinWidth="65">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Padding="3" Background="{Binding BgColor}" CornerRadius="100" 
+                    <!-- Tab Buttons -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 10 0 0">
+                        <Button Content="Acessos" Style="{StaticResource tabButton}" BorderBrush="#00be60"/>
+                    </StackPanel>
+
+                    <!-- Members Datagrid-->
+                    <DataGrid Grid.Row="5" Style="{DynamicResource DataGridStyle}" Name="viwers" DataGridColumnHeader.Click="columnHeader_Click">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="#" IsReadOnly="True" Width="50" CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="-10 5 -20 0 ">
+                                            <Icon:PackIconMaterial Kind="Clock" Width="15" Height="15" Foreground="#00723a" Margin="0" Visibility="{Binding IconNew}"/>
+                                            <Icon:PackIconMaterial Kind="{Binding IconKind}" Width="17" Height="17" Foreground="#6e7783" Margin="15 0 0 0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Usuário" IsReadOnly="True" Width="auto" MinWidth="65">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Padding="3" Background="{Binding BgColor}" CornerRadius="100" 
                                              HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Character}" Width="22.5" Height="22.5" TextAlignment="Center" FontSize="15" FontWeight="SemiBold" ToolTip="{Binding Email}"/>
+                                                <TextBlock Text="{Binding Character}" Width="22.5" Height="22.5" TextAlignment="Center" FontSize="15" FontWeight="SemiBold" ToolTip="{Binding Email}"/>
 
-                                        </Border>
-                                        <TextBlock Text="{Binding DisplayName}" ToolTip="Teste" TextAlignment="Left" FontSize="16" FontWeight="Light" Margin="10 0 0 0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto" CanUserReorder="True" />
-                        <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*" Binding="{Binding Directory}" CanUserReorder="False"/>
-                        <DataGridTemplateColumn Header="Arquivo" IsReadOnly="True" Width="auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock>           
+                                            </Border>
+                                            <TextBlock Text="{Binding DisplayName}" ToolTip="Teste" TextAlignment="Left" FontSize="16" FontWeight="Light" Margin="10 0 0 0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Data" IsReadOnly="True" Binding="{Binding Date, StringFormat=\{0:dd/MM/yy HH:mm\}}" CanUserResize="False" Width="auto" CanUserReorder="True" />
+                            <DataGridTextColumn Header="Diretório" IsReadOnly="True" Width="*" Binding="{Binding Directory}" CanUserReorder="False"/>
+                            <DataGridTemplateColumn Header="Arquivo" IsReadOnly="True" Width="auto">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock>           
                                             <Hyperlink NavigateUri="{Binding ItemWebUrl}" RequestNavigate="Hyperlink_RequestNavigate">
                                                 <TextBlock Text="{Binding ItemName}"/>
                                             </Hyperlink>
                                         </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                
-                <!-- Export Button -->
-                <Button Style="{StaticResource exportButton}" Grid.Row="4" Cursor="Hand" Click="Export_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <Icon:PackIconMaterial Kind="MicrosoftExcel" VerticalAlignment="Center" Width="15" Height="15" Margin="0 0 15 0"/>
-                        <TextBlock Text="Exporta acessos"/>
-                    </StackPanel>
-                </Button>
-                
-                <!-- Search Textbox -->
-                <Grid Width="300" HorizontalAlignment="Left" Grid.Row="4">
-                    <TextBlock Margin="20 0" VerticalAlignment="Center" Foreground="#b0b9c6" IsHitTestVisible="False"
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Export Button -->
+                    <Button Style="{StaticResource exportButton}" Grid.Row="4" Cursor="Hand" Click="Export_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Icon:PackIconMaterial Kind="MicrosoftExcel" VerticalAlignment="Center" Width="15" Height="15" Margin="0 0 15 0"/>
+                            <TextBlock Text="Exporta acessos"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Search Textbox -->
+                    <Grid Width="300" HorizontalAlignment="Left" Grid.Row="4">
+                        <TextBlock Margin="20 0" VerticalAlignment="Center" Foreground="#b0b9c6" IsHitTestVisible="False"
                                Panel.ZIndex="1" Text="Procurando por..."
                                Visibility="{Binding Text.IsEmpty, Converter={StaticResource BoolToVis}, ElementName=txtSearch}" />
 
-                    <TextBox x:Name="txtSearch" Style="{StaticResource textboxSearch}" FontStyle="Normal" />
+                        <TextBox x:Name="txtSearch" Style="{StaticResource textboxSearch}" FontStyle="Normal" />
 
-                    <Icon:PackIconMaterial Kind="Magnify" Width="15" Height="15" VerticalAlignment="Center" 
+                        <Icon:PackIconMaterial Kind="Magnify" Width="15" Height="15" VerticalAlignment="Center" 
                                            Margin="0 0 15 0" Foreground="#b0b9c6" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <!-- Pagination Section -->
+                    <TextBlock Name="txtPages" Grid.Row="6" HorizontalAlignment="Left" Text="10 Páginas" VerticalAlignment="Center" Margin="15 0 0 0" Foreground="#6c7682"/>
+                    <Border Grid.Row="6" HorizontalAlignment="Right" BorderBrush="#dee4ec" BorderThickness="1" CornerRadius="5" Padding="5" Background="White" Margin="0 10 10 10">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource pagingButton}" Cursor="Hand" Click="PagePrevious_Click">
+                                <Icon:PackIconMaterial Kind="ChevronLeft" Style="{StaticResource pagingButtonIcon}"/>
+                            </Button>
+
+                            <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
+
+                            <Button Name="pagingOne" Style="{StaticResource pagingButton}" Content="1" Background="#00723a" Foreground="White" Cursor="Hand" />
+                            <Button Name="pagingTwo" Style="{StaticResource pagingButton}" Content="2" />
+                            <Button Name="pagingThree" Style="{StaticResource pagingButton}" Content="3" />
+
+                            <TextBlock Name="pagingSeparetor" Text="..." Foreground="#6c7682" VerticalAlignment="Center" FontSize="15" Margin="10 0"/>
+
+                            <Button Name="pagingFor"  Style="{StaticResource pagingButton}" Content="4" Click="Page_Click" />
+                            <Button Name="pagingFive"  Style="{StaticResource pagingButton}" Content="5" Click="Page_Click"/>
+                            <Button Name="pagingSix"  Style="{StaticResource pagingButton}" Content="6" Click="Page_Click"/>
+
+                            <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
+
+                            <Button Style="{StaticResource pagingButton}" Click="PageNext_Click">
+                                <Icon:PackIconMaterial Kind="ChevronRight" Style="{StaticResource pagingButtonIcon}"/>
+                            </Button>
+                        </StackPanel>
+                    </Border>
                 </Grid>
-                
-                <!-- Pagination Section -->
-                <TextBlock Name="txtPages" Grid.Row="6" HorizontalAlignment="Left" Text="10 Páginas" VerticalAlignment="Center" Margin="15 0 0 0" Foreground="#6c7682"/>
-                <Border Grid.Row="6" HorizontalAlignment="Right" BorderBrush="#dee4ec" BorderThickness="1" CornerRadius="5" Padding="5" Background="White" Margin="0 10 10 10">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource pagingButton}" Cursor="Hand" Click="PagePrevious_Click">
-                            <Icon:PackIconMaterial Kind="ChevronLeft" Style="{StaticResource pagingButtonIcon}"/>
-                        </Button>
-
-                        <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
-
-                        <Button Name="pagingOne" Style="{StaticResource pagingButton}" Content="1" Background="#00723a" Foreground="White" Cursor="Hand" />
-                        <Button Name="pagingTwo" Style="{StaticResource pagingButton}" Content="2" />
-                        <Button Name="pagingThree" Style="{StaticResource pagingButton}" Content="3" />
-
-                        <TextBlock Name="pagingSeparetor" Text="..." Foreground="#6c7682" VerticalAlignment="Center" FontSize="15" Margin="10 0"/>
-
-                        <Button Name="pagingFor"  Style="{StaticResource pagingButton}" Content="4" Click="Page_Click" />
-                        <Button Name="pagingFive"  Style="{StaticResource pagingButton}" Content="5" Click="Page_Click"/>
-                        <Button Name="pagingSix"  Style="{StaticResource pagingButton}" Content="6" Click="Page_Click"/>
-
-                        <Rectangle Width="1" Fill="#dee4ec" Margin="3 7"/>
-
-                        <Button Style="{StaticResource pagingButton}" Click="PageNext_Click">
-                            <Icon:PackIconMaterial Kind="ChevronRight" Style="{StaticResource pagingButtonIcon}"/>
-                        </Button>
-                    </StackPanel>
-                </Border>
             </Grid>
+
+            <Border HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="#00723a" Height="17" CornerRadius="0 0 22.5 22.5" Margin="2 0">
+                <Grid>
+                    <TextBlock Text="Service: None" Foreground="White" Margin="20 0" HorizontalAlignment="Right" x:Name="txtServiceStatus"></TextBlock>
+                    <TextBlock Text="Versão: 1.2" Foreground="White" Margin="20 0" HorizontalAlignment="Left" x:Name="txtVersion"></TextBlock>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </Window>

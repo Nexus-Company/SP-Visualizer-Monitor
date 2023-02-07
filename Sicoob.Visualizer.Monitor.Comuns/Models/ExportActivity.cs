@@ -8,7 +8,7 @@ public class ExportActivity
     public string Hour { get => actv.Date.ToString("HH:mm:ss"); }
     public string User { get => actv.Account.Name; }
     public string Email { get => actv.Account.Email; }
-    public string Directory { get => actv.Item.Folder.Directory; }
+    public string Directory { get => actv.Item.Folder?.Directory ?? actv.Item.List.Directory; }
     public string FileName { get => actv.Item.Name; }
     public string WebUrl { get => actv.Item.WebUrl; }
 

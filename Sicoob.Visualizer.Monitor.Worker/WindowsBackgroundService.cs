@@ -1,13 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
-using Microsoft.Toolkit.Uwp.Notifications;
 using Sicoob.Visualizer.Monitor.Comuns;
 using Sicoob.Visualizer.Monitor.Comuns.Helpers;
 using Sicoob.Visualizer.Monitor.Dal;
-using Sicoob.Visualizer.Monitor.Dal.Models;
 using System.Data;
 using System.Diagnostics;
-using System.Security.Policy;
 using static Sicoob.Visualizer.Monitor.Comuns.Settings;
 using Activity = Sicoob.Visualizer.Monitor.Dal.Models.Activity;
 using ActivityType = Sicoob.Visualizer.Monitor.Dal.Models.Enums.ActivityType;
@@ -19,7 +16,8 @@ public class WindowsBackgroundService : BackgroundService
     private readonly ILogger<WindowsBackgroundService> _logger;
     public LastHourly LastUpdateHourly { get; set; }
     public bool Stopped { get; private set; }
-
+    internal Updater Updater { get; set; }
+    internal GraphHelper Helper { get => Updater.Helper; }
     public WindowsBackgroundService(ILogger<WindowsBackgroundService> logger)
     {
         _logger = logger;
@@ -29,6 +27,9 @@ public class WindowsBackgroundService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.Log(LogLevel.Information, "Service start Success!");
+
+        Settings settings = LoadSettings();
+        Updater = new(new(settings.OAuth, settings.GetContext()), settings.GetContext());
 
         Thread thComponents = new(() => UpdateComponentsAsync().Wait());
         Thread thAcitvities = new(() => UpdateActivitiesAsync().Wait());
@@ -56,30 +57,25 @@ public class WindowsBackgroundService : BackgroundService
 
     private async Task UpdateComponentsAsync()
     {
+        var timeTables = GetSchedules();
+
         while (!Stopped)
         {
-            var timeTables = GetSchedules();
-            Settings settings = LoadSettings();
-            GraphHelper helper = new(settings.OAuth, settings.GetContext());
+            await Helper.GetLoginAsync();
 
             try
             {
-                await helper.GetLoginAsync();
+                await Updater.UpdateAccountsAsync();
+                _logger.Log(LogLevel.Information, "Update accounts Success!");
 
-                using (Updater updater = new(helper, settings.GetContext()))
-                {
-                    await updater.UpdateAccountsAsync();
-                    _logger.Log(LogLevel.Information, "Update accounts Success!");
+                await Updater.UpdateSitesAsync();
+                _logger.Log(LogLevel.Information, "Update Sites Success!");
 
-                    await updater.UpdateSitesAsync();
-                    _logger.Log(LogLevel.Information, "Update Sites Success!");
+                await Updater.UpdateListsAsync();
+                _logger.Log(LogLevel.Information, "Update Lists Success!");
 
-                    await updater.UpdateListsAsync();
-                    _logger.Log(LogLevel.Information, "Update Lists Success!");
-
-                    await updater.UpdateItemsAsync();
-                    _logger.Log(LogLevel.Information, "Update Items Success!");
-                }
+                await Updater.UpdateItemsAsync();
+                _logger.Log(LogLevel.Information, "Update Items Success!");
 
                 if (!CheckHourly(timeTables, out Hourly? actualHourly))
                     continue;
@@ -104,11 +100,10 @@ public class WindowsBackgroundService : BackgroundService
     }
     private async Task UpdateActivitiesAsync()
     {
+        using var ctx = LoadSettings().GetContext();
+
         while (!Stopped)
         {
-            Settings settings = LoadSettings();
-            GraphHelper helper = new(settings.OAuth, settings.GetContext());
-            MonitorContext ctx = settings.GetContext();
             var lists = await ctx.Lists.ToArrayAsync();
 
             foreach (var list in lists)
@@ -120,7 +115,7 @@ public class WindowsBackgroundService : BackgroundService
                                    where it.ListId == list.Id || it.Folder.ListId == list.Id
                                    select it).ToArrayAsync();
 
-                await helper.GetLoginAsync();
+                await Helper.GetLoginAsync();
 
                 foreach (var item in items)
                 {
@@ -135,8 +130,8 @@ public class WindowsBackgroundService : BackgroundService
                         string eTag = item.Etag.Split(",")[0];
                         Stopwatch stopwatch = new();
 
-                        FileActivity[] editActivity = await helper.GetActivityAsync(list.DriveId, eTag, ActivityType.Edit);
-                        FileActivity[] accessActivity = await helper.GetActivityAsync(list.DriveId, eTag, ActivityType.Access);
+                        FileActivity[] editActivity = await Updater.Helper.GetActivityAsync(list.DriveId, eTag, ActivityType.Edit);
+                        FileActivity[] accessActivity = await Helper.GetActivityAsync(list.DriveId, eTag, ActivityType.Access);
 
                         FileActivity[] activities = new FileActivity[editActivity.Length + accessActivity.Length];
                         editActivity.CopyTo(activities, 0);
@@ -166,8 +161,6 @@ public class WindowsBackgroundService : BackgroundService
                             }
                         }
 
-                        await ctx.SaveChangesAsync();
-
                         _logger.Log(LogLevel.Debug, $"Get activities for item: {item.Id} in {stopwatch.Elapsed}");
                     }
                     catch (Exception ex)
@@ -175,7 +168,13 @@ public class WindowsBackgroundService : BackgroundService
                         _logger.Log(LogLevel.Error, ex, null);
                     }
                 }
+
+                await ctx.SaveChangesAsync();
             }
+
+#if !DEBUG
+                Thread.Sleep(150000);
+#endif
         }
     }
 

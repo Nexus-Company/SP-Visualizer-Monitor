@@ -150,7 +150,7 @@ public class ExportHelper
     private string BuildHtml(IEnumerable<ExportActivity> exports)
     {
         // Create a new StringBuilder to hold the HTML
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new();
 
         // Add the HTML table header
         sb.Append("<table>");

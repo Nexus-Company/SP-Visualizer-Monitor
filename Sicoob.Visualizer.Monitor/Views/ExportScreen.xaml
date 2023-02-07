@@ -15,8 +15,8 @@
     <Grid>
         <StackPanel Orientation="Vertical"  HorizontalAlignment="Right" Margin="0 5 25 0">
             <TextBlock Text="Ordem" Foreground="#121518" FontSize="15" FontWeight="Light"  TextAlignment="Left"/>
-            <RadioButton GroupName="Order" Content="Crescente" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0 10 0 2.5"/>
-            <RadioButton Name="rdOrdAscending" GroupName="Order" Content="Decrescente" VerticalAlignment="Top" HorizontalAlignment="Left" IsChecked="True"/>
+            <RadioButton Name="rdOrdAscending" GroupName="Order" Content="Mais Recentes" VerticalAlignment="Top" HorizontalAlignment="Left" IsChecked="True"/>
+            <RadioButton GroupName="Order" Content="Mais Antigos" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0 10 0 2.5"/>
         </StackPanel>
         <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="1" HorizontalAlignment="Center" Margin="0 10 0 100"/>
         <StackPanel Orientation="Vertical"  HorizontalAlignment="Left" Margin="15 5 10 0">

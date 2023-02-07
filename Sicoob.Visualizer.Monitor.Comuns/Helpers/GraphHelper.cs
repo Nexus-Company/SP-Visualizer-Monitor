@@ -305,9 +305,9 @@ public class GraphHelper : IDisposable
         if (ascending != null)
         {
             if (ascending ?? false)
-                activitiesQuery = activitiesQuery.OrderBy(act => act.Date);
-            else
                 activitiesQuery = activitiesQuery.OrderByDescending(act => act.Date);
+            else
+                activitiesQuery = activitiesQuery.OrderBy(act => act.Date);
         }
         else
         {
@@ -325,12 +325,11 @@ public class GraphHelper : IDisposable
         if (page < 1)
             page = 1;
 
-        if (page > pages)
+        if (page > pages && pages > 1)
             page = pages;
 
         if (perPage > 0)
-            activitiesQuery = activitiesQuery
-                .Skip((page - 1) * perPage)
+            activitiesQuery = activitiesQuery.Skip((page - 1) * perPage)
                 .Take(perPage);
 
         try
@@ -338,7 +337,8 @@ public class GraphHelper : IDisposable
             var queryObj = activitiesQuery
                 .Include(act => act.Account)
                 .Include(act => act.Item)
-                .Include(act => act.Item.Folder);
+                .Include(act => act.Item.Folder)
+                .Include(act => act.Item.List);
 
             string query = queryObj.ToQueryString();
 

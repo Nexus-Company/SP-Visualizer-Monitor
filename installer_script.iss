@@ -567,7 +567,7 @@ end;
 [Setup]
 #define MyAppName "Sharepoint Monitor (Beta)"
 #define MyAppSetupName "sharepoint-vm-installer"
-#define MyAppVersion "1.0"
+#define MyAppVersion "0.1.3"
 #define MyAppPublisher "Nexus Company, Inc."
 #define MyAppURL "https://nexus-company.tech"
 #define MyAppCopyright "©2023 Nexus Company, todos os direitos reservados."

@@ -18,7 +18,7 @@ namespace Sicoob.Visualizer.Monitor.Wpf
     /// </summary>
     public partial class SplashScreen : Window
     {
-        public const string version = "1.0.2";
+        public const string version = "0.1.3";
         public const string monitorServiceName =
 #if DEBUG
      "SP Visualizer Service (Debug)";

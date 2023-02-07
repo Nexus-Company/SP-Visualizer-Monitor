@@ -50,9 +50,9 @@ internal class Updater : IDisposable
                     if (acc.Color.Equals("#000", StringComparison.InvariantCultureIgnoreCase))
                         acc.Color = RandomColor;
                 }
-
-                await ctx.SaveChangesAsync();
             }
+
+            await ctx.SaveChangesAsync();
 
             next = users.NextPageRequest != null;
 
@@ -89,9 +89,9 @@ internal class Updater : IDisposable
                     site.Name = item.DisplayName;
                     site.WebUrl = item.WebUrl;
                 }
-
-                await ctx.SaveChangesAsync();
             }
+
+            await ctx.SaveChangesAsync();
 
             next = sites.NextPageRequest != null;
 
@@ -127,7 +127,7 @@ internal class Updater : IDisposable
                             SiteId = site.Id,
                             DriveId = drive?.Id,
                             WebUrl = item.WebUrl,
-                            Directory = Folder.RemoveSeparetors(item.WebUrl.Remove(0,site.WebUrl.Length))
+                            Directory = Folder.RemoveSeparetors(item.WebUrl.Remove(0, site.WebUrl.Length))
                         };
 
                         await ctx.Lists.AddAsync(list);
@@ -139,8 +139,9 @@ internal class Updater : IDisposable
                         list.Directory = Folder.RemoveSeparetors(item.WebUrl.Remove(0, site.WebUrl.Length));
                     }
 
-                    await ctx.SaveChangesAsync();
                 }
+
+                await ctx.SaveChangesAsync();
 
                 next = lists.NextPageRequest != null;
 
@@ -165,7 +166,7 @@ internal class Updater : IDisposable
                 foreach (var item in items)
                 {
                     string directory = item.WebUrl[list.Site.WebUrl.Length..];
-                    string fileName = Path.GetFileName(directory);
+                    string fileName = Folder.RemoveSeparetors(Path.GetFileName(directory));
                     directory = Folder.RemoveSeparetors(directory[..^fileName.Length]);
 
                     #region Add Folder
@@ -193,7 +194,6 @@ internal class Updater : IDisposable
                             folder.Directory = Path.Combine(directory, fileName);
                         }
 
-                        await ctx.SaveChangesAsync();
                         continue;
                     }
                     #endregion
@@ -225,8 +225,9 @@ internal class Updater : IDisposable
                         file.WebUrl = item.WebUrl;
                     }
 
-                    await ctx.SaveChangesAsync();
                 }
+
+                await ctx.SaveChangesAsync();
 
                 next = items.NextPageRequest != null;
 
